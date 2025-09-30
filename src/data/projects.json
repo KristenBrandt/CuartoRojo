@@ -1,0 +1,150 @@
+[
+  {
+    "id": "1",
+    "title": "Luna & Carlos Wedding",
+    "slug": "luna-carlos-wedding",
+    "category": "weddings",
+    "client": "Luna & Carlos Mendoza",
+    "location": "Hacienda San José, México",
+    "date": "2024-03-15",
+    "services": ["Event Logistics", "Audiovisual Coverage", "Post-Production"],
+    "featured": true,
+    "heroMedia": {
+      "type": "image",
+      "url": "/projects/wedding-1-hero.jpg",
+      "alt": "Luna and Carlos wedding ceremony at sunset"
+    },
+    "gallery": [
+      {
+        "type": "image",
+        "url": "/projects/wedding-1-1.jpg",
+        "alt": "Wedding ceremony setup"
+      },
+      {
+        "type": "image",
+        "url": "/projects/wedding-1-2.jpg",
+        "alt": "Bride and groom first dance"
+      },
+      {
+        "type": "video",
+        "url": "/projects/wedding-1-reel.mp4",
+        "poster": "/projects/wedding-1-reel-poster.jpg",
+        "alt": "Wedding highlight reel"
+      }
+    ],
+    "description": "A cinematic celebration of love at a historic hacienda, blending traditional Mexican elements with modern elegance.",
+    "challenges": "Coordinating multiple vendors across a sprawling venue while capturing intimate moments in challenging lighting conditions.",
+    "solution": "We implemented a comprehensive logistics timeline and deployed specialized low-light equipment for seamless coverage.",
+    "results": [
+      "100+ hours of footage captured",
+      "3-minute highlight reel delivered within 48 hours",
+      "Full ceremony edit completed in 2 weeks"
+    ],
+    "deliverables": [
+      "Full ceremony and reception footage",
+      "3-minute cinematic highlight reel",
+      "60+ edited photos",
+      "Social media content package"
+    ],
+    "embedReel": "https://vimeo.com/sample-wedding-reel",
+    "seo": {
+      "title": "Luna & Carlos Wedding - Cinematic Coverage | Cuarto Rojo",
+      "description": "Professional wedding videography and photography at Hacienda San José. See how we captured this magical Mexican celebration.",
+      "keywords": ["wedding videography", "Mexico wedding", "hacienda wedding", "cinematic wedding"]
+    }
+  },
+  {
+    "id": "2",
+    "title": "TechCorp Annual Summit",
+    "slug": "techcorp-annual-summit",
+    "category": "corporate",
+    "client": "TechCorp International",
+    "location": "Centro de Convenciones, CDMX",
+    "date": "2024-02-20",
+    "services": ["Event Logistics", "Live Streaming", "Post-Production"],
+    "featured": true,
+    "heroMedia": {
+      "type": "image",
+      "url": "/projects/corporate-1-hero.jpg",
+      "alt": "TechCorp summit main stage with dynamic lighting"
+    },
+    "gallery": [
+      {
+        "type": "image",
+        "url": "/projects/corporate-1-1.jpg",
+        "alt": "Conference main stage setup"
+      },
+      {
+        "type": "image",
+        "url": "/projects/corporate-1-2.jpg",
+        "alt": "Networking session coverage"
+      }
+    ],
+    "description": "A high-stakes corporate summit requiring flawless execution and multi-platform distribution.",
+    "challenges": "Live streaming to 5000+ remote attendees while managing complex AV setups across multiple breakout rooms.",
+    "solution": "Deployed redundant streaming infrastructure and coordinated seamless transitions between 8 concurrent sessions.",
+    "results": [
+      "99.9% uptime across all streaming platforms",
+      "5,200 remote attendees engaged",
+      "48-hour turnaround for edited highlights"
+    ],
+    "deliverables": [
+      "Multi-camera live stream coverage",
+      "Individual session recordings",
+      "Executive interview package",
+      "Event highlight reel"
+    ],
+    "seo": {
+      "title": "TechCorp Annual Summit - Corporate Event Production | Cuarto Rojo",
+      "description": "Professional corporate event coverage and live streaming for TechCorp's annual summit in Mexico City.",
+      "keywords": ["corporate events", "live streaming", "conference production", "Mexico City events"]
+    }
+  },
+  {
+    "id": "3",
+    "title": "Artisan Food Festival",
+    "slug": "artisan-food-festival",
+    "category": "food-styling",
+    "client": "Mercado Gastronómico",
+    "location": "Plaza San Jacinto, Coyoacán",
+    "date": "2024-01-10",
+    "services": ["Food Styling", "Product Photography", "Event Coverage"],
+    "featured": false,
+    "heroMedia": {
+      "type": "image",
+      "url": "/projects/food-1-hero.jpg",
+      "alt": "Beautifully styled artisan dishes at food festival"
+    },
+    "gallery": [
+      {
+        "type": "image",
+        "url": "/projects/food-1-1.jpg",
+        "alt": "Styled taco presentation"
+      },
+      {
+        "type": "image",
+        "url": "/projects/food-1-2.jpg",
+        "alt": "Artisan bread display"
+      }
+    ],
+    "description": "Showcasing Mexico's finest artisan foods through compelling visual storytelling and meticulous styling.",
+    "challenges": "Styling and photographing perishable foods in outdoor conditions while maintaining freshness and appeal.",
+    "solution": "Developed a mobile styling station with climate control and rapid-fire photography techniques.",
+    "results": [
+      "300+ styled product shots",
+      "Featured in 5 culinary magazines",
+      "Social media reach of 100K+"
+    ],
+    "deliverables": [
+      "Product photography portfolio",
+      "Behind-the-scenes video content",
+      "Social media assets",
+      "Vendor promotional materials"
+    ],
+    "seo": {
+      "title": "Artisan Food Festival - Food Styling & Photography | Cuarto Rojo",
+      "description": "Professional food styling and photography for Mexico's premier artisan food festival in Coyoacán.",
+      "keywords": ["food styling", "product photography", "food festival", "culinary photography"]
+    }
+  }
+]

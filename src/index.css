@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Cuarto Rojo Design System - 4to Rojo Brand Colors
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Brand Colors - 4to Rojo Official Palette */
+    --brand-red: 356 95% 46%;
+    --brand-red-light: 356 95% 56%;
+    --brand-red-dark: 356 95% 36%;
+    --brand-black: 60 4% 11%;
+    --brand-charcoal: 60 4% 15%;
+    --brand-gray: 60 4% 25%;
+    
+    /* Core System Colors */
+    --background: 0 0% 100%;
+    --foreground: 60 4% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 60 4% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 60 4% 11%;
+
+    --primary: 356 95% 46%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 60 4% 11%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 356 95% 56%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 356 95% 46%;
+
+    /* Cinematic Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(var(--brand-red-dark)), hsl(var(--brand-black)));
+    --gradient-card: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+    --gradient-overlay: linear-gradient(0deg, hsl(var(--brand-black) / 0.8), transparent);
+    
+    /* Shadows & Effects */
+    --shadow-cinematic: 0 25px 50px -12px hsl(var(--brand-red) / 0.3);
+    --shadow-elegant: 0 10px 30px -10px hsl(var(--brand-black) / 0.3);
+    --shadow-glow: 0 0 40px hsl(var(--brand-red) / 0.4);
+
+    /* Animation Timing */
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Dark Mode - Enhanced Cinematic Experience */
+    --background: 60 4% 11%;
+    --foreground: 0 0% 100%;
+
+    --card: 60 4% 15%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 60 4% 15%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 356 95% 56%;
+    --primary-foreground: 60 4% 11%;
+
+    --secondary: 60 4% 15%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 60 4% 15%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 356 95% 46%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 60 4% 20%;
+    --input: 60 4% 20%;
+    --ring: 356 95% 56%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

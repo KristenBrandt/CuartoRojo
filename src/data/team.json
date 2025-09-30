@@ -1,0 +1,44 @@
+[
+  {
+    "id": "1",
+    "name": "Alexander Daum",
+    "role": "Creative Director",
+    "bio": "With over 10 years in the industry, Diego brings a cinematic vision to every project. His background in film production ensures each event is captured with artistic precision.",
+    "avatar": "/team/diego-avatar.jpg",
+    "social": {
+      "instagram": "https://instagram.com/diego_cr",
+      "linkedin": "https://linkedin.com/in/diego-ramirez"
+    }
+  },
+  {
+    "id": "2",
+    "name": "Antonio Chajón", 
+    "role": "Logistics Coordinator",
+    "bio": "Sofía's meticulous attention to detail and crisis management skills ensure flawless event execution. She coordinates complex logistics with grace under pressure.",
+    "avatar": "/team/sofia-avatar.jpg",
+    "social": {
+      "linkedin": "https://linkedin.com/in/sofia-herrera"
+    }
+  },
+  {
+    "id": "3",
+    "name": "Alejandro García",
+    "role": "Lead Editor",
+    "bio": "Carlos transforms raw footage into compelling stories. His expertise in color grading and sound design brings emotional depth to every production.",
+    "avatar": "/team/carlos-avatar.jpg",
+    "social": {
+      "behance": "https://behance.net/carlos-mendoza",
+      "instagram": "https://instagram.com/carlos_edits"
+    }
+  },
+  {
+    "id": "4",
+    "name": "Ana Flores",
+    "role": "Food Stylist",
+    "bio": "Ana combines culinary arts with visual storytelling. Her styling makes every dish irresistible, elevating food photography to an art form.",
+    "avatar": "/team/ana-avatar.jpg",
+    "social": {
+      "instagram": "https://instagram.com/ana_foodstylist"
+    }
+  }
+]

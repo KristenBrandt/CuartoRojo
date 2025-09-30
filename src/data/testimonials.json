@@ -1,0 +1,41 @@
+[
+  {
+    "id": "1",
+    "name": "Luna Mendoza",
+    "role": "Bride",
+    "company": "Luna & Carlos Wedding",
+    "content": "Cuarto Rojo captured our wedding day perfectly. The team was professional, unobtrusive, and the final video brought tears to our eyes. They understood our vision and exceeded every expectation.",
+    "avatar": "/testimonials/luna-avatar.jpg",
+    "rating": 5,
+    "projectId": "1"
+  },
+  {
+    "id": "2", 
+    "name": "María González",
+    "role": "Marketing Director",
+    "company": "TechCorp International",
+    "content": "The live streaming execution was flawless. Despite the complexity of our multi-room setup, Cuarto Rojo delivered professional coverage that reached our global audience without a hitch.",
+    "avatar": "/testimonials/maria-avatar.jpg",
+    "rating": 5,
+    "projectId": "2"
+  },
+  {
+    "id": "3",
+    "name": "Chef Roberto Sánchez",
+    "role": "Head Chef",
+    "company": "Mercado Gastronómico",
+    "content": "Their food styling transformed our dishes into art. The photography captured not just the food, but the passion behind every recipe. Sales increased 40% after the campaign.",
+    "avatar": "/testimonials/roberto-avatar.jpg", 
+    "rating": 5,
+    "projectId": "3"
+  },
+  {
+    "id": "4",
+    "name": "Andrea López",
+    "role": "Event Coordinator",
+    "company": "Eventos Premium",
+    "content": "Working with Cuarto Rojo is always a pleasure. Their attention to detail and ability to adapt on the fly makes them our go-to partner for high-profile events.",
+    "avatar": "/testimonials/andrea-avatar.jpg",
+    "rating": 5
+  }
+]

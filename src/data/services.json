@@ -1,0 +1,102 @@
+[
+  {
+    "id": "logistics",
+    "title": "Event Logistics",
+    "slug": "event-logistics",
+    "description": "Comprehensive event planning and coordination, ensuring every detail is executed flawlessly from concept to completion.",
+    "deliverables": [
+      "Venue scouting and management",
+      "Vendor coordination and oversight",
+      "Timeline development and execution",
+      "Day-of event coordination",
+      "Equipment and technology setup",
+      "Guest experience management"
+    ],
+    "gallery": [
+      {
+        "type": "image",
+        "url": "/services/logistics-1.jpg",
+        "alt": "Event setup and coordination"
+      },
+      {
+        "type": "image",
+        "url": "/services/logistics-2.jpg",
+        "alt": "Behind the scenes coordination"
+      }
+    ],
+    "icon": "Calendar",
+    "featured": true,
+    "seo": {
+      "title": "Event Logistics & Planning Services | Cuarto Rojo",
+      "description": "Professional event logistics and coordination services. We handle every detail so you can focus on what matters most.",
+      "keywords": ["event logistics", "event planning", "event coordination", "Mexico events"]
+    }
+  },
+  {
+    "id": "coverage",
+    "title": "Audiovisual Coverage", 
+    "slug": "audiovisual-coverage",
+    "description": "Professional photography and videography services capturing the essence and emotion of your special moments.",
+    "deliverables": [
+      "Multi-camera video production",
+      "Professional photography",
+      "Live streaming capabilities",
+      "Drone footage (when permitted)",
+      "Real-time social media content",
+      "Same-day highlight delivery"
+    ],
+    "gallery": [
+      {
+        "type": "image",
+        "url": "/services/coverage-1.jpg",
+        "alt": "Professional camera equipment in action"
+      },
+      {
+        "type": "video",
+        "url": "/services/coverage-reel.mp4",
+        "poster": "/services/coverage-reel-poster.jpg",
+        "alt": "Audiovisual coverage showreel"
+      }
+    ],
+    "icon": "Camera",
+    "featured": true,
+    "seo": {
+      "title": "Professional Audiovisual Coverage | Cuarto Rojo",
+      "description": "Expert photography and videography services for events. Capture every moment with cinematic quality.",
+      "keywords": ["event videography", "event photography", "live streaming", "professional coverage"]
+    }
+  },
+  {
+    "id": "post-production",
+    "title": "Post-Production",
+    "slug": "post-production", 
+    "description": "Expert editing and post-production services transforming raw footage into compelling visual stories.",
+    "deliverables": [
+      "Professional video editing",
+      "Color grading and correction",
+      "Audio mixing and mastering",
+      "Motion graphics and titles",
+      "Social media optimization",
+      "Multiple format delivery"
+    ],
+    "gallery": [
+      {
+        "type": "image",
+        "url": "/services/post-1.jpg",
+        "alt": "Video editing workspace"
+      },
+      {
+        "type": "image",
+        "url": "/services/post-2.jpg",
+        "alt": "Color grading session"
+      }
+    ],
+    "icon": "Film",
+    "featured": true,
+    "seo": {
+      "title": "Video Post-Production & Editing Services | Cuarto Rojo",
+      "description": "Professional video editing and post-production services. Transform your footage into compelling visual stories.",
+      "keywords": ["video editing", "post production", "color grading", "video production"]
+    }
+  }
+]

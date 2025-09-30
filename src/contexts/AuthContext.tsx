@@ -19,70 +19,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        if (session?.user) {
-          // Fetch user role
-          const { data: roleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id)
-            .single();
+  async function hydrateUser(session: Session | null) {
+  setSession(session);
+  if (!session?.user) {
+    setUser(null);
+    return;
+  }
 
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('name')
-            .eq('id', session.user.id)
-            .single();
+  const uid = session.user.id;
 
-          setUser({
-            id: session.user.id,
-            email: session.user.email!,
-            name: profileData?.name || session.user.email!,
-            role: roleData?.role || 'viewer'
-          });
-        } else {
-          setUser(null);
-        }
-        setIsLoading(false);
-      }
-    );
+  // Fetch in parallel and don't error if rows don't exist
+  const [{ data: roleData }, { data: profileData }] = await Promise.all([
+    supabase.from('user_roles').select('role').eq('user_id', uid).maybeSingle(),
+    supabase.from('profiles').select('name').eq('id', uid).maybeSingle(),
+  ]);
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        setTimeout(async () => {
-          const { data: roleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id)
-            .single();
+  setUser({
+    id: uid,
+    email: session.user.email!,
+    name: profileData?.name || session.user.email!,
+    role: roleData?.role || 'viewer',
+  });
+}
 
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('name')
-            .eq('id', session.user.id)
-            .single();
+useEffect(() => {
+  let mounted = true;
 
-          setUser({
-            id: session.user.id,
-            email: session.user.email!,
-            name: profileData?.name || session.user.email!,
-            role: roleData?.role || 'viewer'
-          });
-          setIsLoading(false);
-        }, 0);
-      } else {
-        setIsLoading(false);
-      }
-    });
+  // ① Listen for future changes (do NOT toggle isLoading here)
+  const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    if (!mounted) return;
+    void hydrateUser(nextSession);
+  });
 
-    return () => subscription.unsubscribe();
-  }, []);
+  //  Resolve the initial session once, then stop loading
+  (async () => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (!mounted) return;
+      await hydrateUser(data.session);
+    } finally {
+      if (mounted) setIsLoading(false); // <- spinner ends here, even if no session
+    }
+  })();
+
+  return () => {
+    mounted = false;
+    sub.subscription.unsubscribe();
+  };
+}, []);
+
+
 
   const login = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({

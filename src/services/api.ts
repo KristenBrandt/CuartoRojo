@@ -366,7 +366,7 @@ export const categoriesService = {
       slug: cat.slug,
       description: cat.description || '',
       color: cat.color,
-      is_active: true,
+      is_active: cat.is_active,
       project_count: cat.project_count,
       created_at: cat.created_at,
       updated_at: cat.updated_at
@@ -382,7 +382,8 @@ export const categoriesService = {
         name: category.name,
         slug,
         description: category.description,
-        color: category.color
+        color: category.color,
+        is_active: category.is_active
       })
       .select()
       .single();
@@ -408,7 +409,8 @@ export const categoriesService = {
       .update({
         name: category.name,
         description: category.description,
-        color: category.color
+        color: category.color,
+        is_active: category.is_active
       })
       .eq('id', id);
 

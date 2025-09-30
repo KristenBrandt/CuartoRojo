@@ -231,75 +231,77 @@ export const projectsService = {
 
 export const usersService = {
   async getUsers(): Promise<User[]> {
+    // Use a proper view or explicit join
     const { data, error } = await supabase
-      .from('profiles')
-      .select(`
-        *,
-        role:user_roles(role)
-      `);
+      .from('app_users_v') // sql view
+      .select('*')
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
 
-    return data.map((profile: any) => ({
-      id: profile.id,
-      name: profile.name || profile.email,
-      email: profile.email,
-      role: profile.role?.[0]?.role || 'viewer',
-      created_at: profile.created_at,
-      updated_at: profile.updated_at,
-      last_login_at: null,
-      is_active: true
+    return (data ?? []).map((u: any) => ({
+      id: u.id,
+      name: u.name || u.email,
+      email: u.email,
+      role: u.role,              // always 'admin' for new users
+      created_at: u.created_at,
+      updated_at: u.updated_at ?? null, 
+      is_active: u.is_active ?? true,
     }));
   },
 
-  async createUser(user: CreateUserForm): Promise<User> {
-    // Note: User creation requires admin API or edge function
-    // For now, this is a placeholder
-    throw new Error('User creation requires backend implementation');
+  async createUser(user: { name: string; email: string; password: string; is_active?: boolean }): Promise<User> {
+    // Must go through your API route that uses the service key
+    const res = await fetch('/api/admin/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'create', payload: user }),
+    });
+
+    if (!res.ok) throw new Error('Create failed');
+    const { user: created } = await res.json();
+
+    return {
+      id: created.id,
+      name: user.name,
+      email: user.email,
+      role: 'admin',
+      created_at: created.created_at,
+      updated_at: created.updated_at ?? null,
+      is_active: user.is_active ?? true,
+    };
   },
 
   async updateUser(id: string, user: Partial<User>): Promise<User> {
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        name: user.name,
-        email: user.email
-      })
-      .eq('id', id);
+      const { error } = await supabase.rpc('admin_update_user', {
+        p_id: id,
+        p_name: user.name ?? null,
+        p_role: user.role ?? null,
+        p_is_active: typeof user.is_active === 'boolean' ? user.is_active : null,
+      });
+      if (error) throw error;
 
-    if (error) throw error;
-
-    if (user.role) {
-      await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', id);
-
-      await supabase
-        .from('user_roles')
-        .insert({
-          user_id: id,
-          role: user.role as any
-        });
-    }
 
     const users = await this.getUsers();
     return users.find(u => u.id === id)!;
   },
 
   async deleteUser(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
+    // Deleting from profiles won’t delete from auth.users
+    // Better: call your API route with service key
+    const res = await fetch(`/api/admin/users?id=${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Delete failed');
   },
 
-  async resetUserPassword(id: string): Promise<void> {
-    // Password reset requires admin API or edge function
-    throw new Error('Password reset requires backend implementation');
-  }
+  async resetUserPassword(email: string): Promise<void> {
+    // Must go through your API route with service key
+    const res = await fetch('/api/admin/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'reset_password', payload: { email } }),
+    });
+    if (!res.ok) throw new Error('Reset failed');
+  },
 };
 
 export const dashboardService = {

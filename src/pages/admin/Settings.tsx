@@ -113,12 +113,11 @@ export default function Settings() {
         </div>
 
         <Tabs defaultValue="general" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="contact">Contacto</TabsTrigger>
             <TabsTrigger value="social">Redes Sociales</TabsTrigger>
             <TabsTrigger value="seo">SEO</TabsTrigger>
-            <TabsTrigger value="features">Funciones</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general">
@@ -328,78 +327,6 @@ export default function Settings() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="features">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Funciones del Sitio
-                </CardTitle>
-                <CardDescription>
-                  Activar o desactivar funcionalidades
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="enableComments">Comentarios</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Permitir comentarios en proyectos
-                    </p>
-                  </div>
-                  <Switch
-                    id="enableComments"
-                    checked={settings.features.enableComments}
-                    onCheckedChange={(checked) => updateSettings('features.enableComments', checked)}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="enableNewsletter">Newsletter</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Formulario de suscripción al newsletter
-                    </p>
-                  </div>
-                  <Switch
-                    id="enableNewsletter"
-                    checked={settings.features.enableNewsletter}
-                    onCheckedChange={(checked) => updateSettings('features.enableNewsletter', checked)}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="enableAnalytics">Analytics</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Seguimiento de Google Analytics
-                    </p>
-                  </div>
-                  <Switch
-                    id="enableAnalytics"
-                    checked={settings.features.enableAnalytics}
-                    onCheckedChange={(checked) => updateSettings('features.enableAnalytics', checked)}
-                  />
-                </div>
-                
-                <Separator />
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="maintenanceMode">Modo Mantenimiento</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Mostrar página de mantenimiento a visitantes
-                    </p>
-                  </div>
-                  <Switch
-                    id="maintenanceMode"
-                    checked={settings.features.maintenanceMode}
-                    onCheckedChange={(checked) => updateSettings('features.maintenanceMode', checked)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </AdminLayout>

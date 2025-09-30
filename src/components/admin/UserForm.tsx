@@ -15,7 +15,7 @@ import { User, CreateUserForm } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
 interface UserFormProps {
-  user?: User;
+  user?: User;                // if provided → edit mode
   onSave: (user: User) => void;
 }
 
@@ -32,7 +32,7 @@ export function UserForm({ user, onSave }: UserFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.email) {
       toast({
         title: 'Error',
@@ -56,28 +56,33 @@ export function UserForm({ user, onSave }: UserFormProps) {
       let savedUser: User;
 
       if (user) {
-        // Update existing user
-        const updateData = { ...formData };
-        if (!updateData.password) {
-          delete updateData.password;
-        }
-        savedUser = await usersService.updateUser(user.id, updateData);
+        // 🔹 Edit existing user
+        savedUser = await usersService.updateUser(user.id, {
+          name: formData.name,
+          role: formData.role,
+          is_active: formData.is_active,
+        });
       } else {
-        // Create new user
-        savedUser = await usersService.createUser(formData);
+        // 🔹 Create new user (must include password)
+        savedUser = await usersService.createUser({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          is_active: formData.is_active,
+        });
       }
 
       onSave(savedUser);
       toast({
         title: user ? 'Usuario actualizado' : 'Usuario creado',
-        description: user 
+        description: user
           ? 'El usuario ha sido actualizado correctamente'
           : 'El usuario ha sido creado correctamente',
       });
     } catch (error) {
       toast({
         title: 'Error',
-        description: user 
+        description: user
           ? 'No se pudo actualizar el usuario'
           : 'No se pudo crear el usuario',
         variant: 'destructive',
@@ -89,6 +94,7 @@ export function UserForm({ user, onSave }: UserFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Name */}
       <div className="space-y-2">
         <Label htmlFor="name">Nombre *</Label>
         <Input
@@ -100,6 +106,7 @@ export function UserForm({ user, onSave }: UserFormProps) {
         />
       </div>
 
+      {/* Email */}
       <div className="space-y-2">
         <Label htmlFor="email">Email *</Label>
         <Input
@@ -109,28 +116,33 @@ export function UserForm({ user, onSave }: UserFormProps) {
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           placeholder="usuario@ejemplo.com"
           required
+          disabled={!!user} // cannot change after creation
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="password">
-          {user ? 'Nueva Contraseña (opcional)' : 'Contraseña *'}
-        </Label>
-        <Input
-          id="password"
-          type="password"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          placeholder={user ? 'Dejar en blanco para mantener actual' : 'Contraseña'}
-          required={!user}
-        />
-      </div>
+      {/* Password (only show on create) */}
+      {!user && (
+        <div className="space-y-2">
+          <Label htmlFor="password">Contraseña *</Label>
+          <Input
+            id="password"
+            type="password"
+            value={formData.password}
+            onChange={(e) =>
+              setFormData({ ...formData, password: e.target.value })
+            }
+            placeholder="Contraseña"
+            required
+          />
+        </div>
+      )}
 
+      {/* Role */}
       <div className="space-y-2">
         <Label htmlFor="role">Rol</Label>
         <Select
           value={formData.role}
-          onValueChange={(value: 'admin') => 
+          onValueChange={(value: 'admin' | 'editor' | 'viewer') =>
             setFormData({ ...formData, role: value })
           }
         >
@@ -139,24 +151,28 @@ export function UserForm({ user, onSave }: UserFormProps) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="admin">Administrador</SelectItem>
+            <SelectItem value="editor">Editor</SelectItem>
+            <SelectItem value="viewer">Usuario</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
+      {/* Active toggle */}
       <div className="flex items-center space-x-2">
         <Switch
           id="is_active"
           checked={formData.is_active}
-          onCheckedChange={(checked) => 
+          onCheckedChange={(checked) =>
             setFormData({ ...formData, is_active: checked })
           }
         />
         <Label htmlFor="is_active">Usuario activo</Label>
       </div>
 
+      {/* Submit */}
       <div className="flex justify-end space-x-2 pt-4">
         <Button type="submit" disabled={loading}>
-          {loading ? 'Guardando...' : (user ? 'Actualizar' : 'Crear')}
+          {loading ? 'Guardando...' : user ? 'Actualizar' : 'Crear'}
         </Button>
       </div>
     </form>

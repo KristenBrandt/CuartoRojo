@@ -77,9 +77,9 @@ export default function Users() {
     }
   };
 
-  const handleResetPassword = async (id: string) => {
+  const handleResetPassword = async (email: string) => {
     try {
-      await usersService.resetUserPassword(id);
+      await usersService.resetUserPassword(email);
       toast({
         title: 'Contraseña restablecida',
         description: 'Se ha enviado un email con la nueva contraseña',
@@ -196,20 +196,20 @@ export default function Users() {
                           <DropdownMenuItem
                             onClick={() => {
                               setEditingUser(user);
-                              setIsCreateModalOpen(true);
+                              //setIsCreateModalOpen(true);
                             }}
                           >
                             <UserCheck className="mr-2 h-4 w-4" />
                             Editar
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleResetPassword(user.id)}
+                            onClick={() => handleResetPassword(user.email)}
                           >
                             <KeyRound className="mr-2 h-4 w-4" />
                             Restablecer Contraseña
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleDeleteUser(user.id)}
+                            onClick={() => handleDeleteUser(user.email)}
                             className="text-destructive"
                           >
                             <UserX className="mr-2 h-4 w-4" />

@@ -62,7 +62,7 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Panel Administrativo</h1>
             <p className="text-muted-foreground">
               Resumen general de proyectos y actividad reciente
             </p>

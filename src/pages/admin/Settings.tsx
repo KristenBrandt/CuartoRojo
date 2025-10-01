@@ -10,10 +10,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Save, Upload, Image, Mail, Globe, Shield } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
+// ----- Keep your interface exactly the same -----
 interface SiteSettings {
-  siteName: string;
-  siteDescription: string;
   contactEmail: string;
   phone: string;
   address: string;
@@ -23,23 +23,24 @@ interface SiteSettings {
     twitter: string;
     linkedin: string;
   };
-  seo: {
-    metaTitle: string;
-    metaDescription: string;
-    keywords: string;
-  };
-  features: {
-    enableComments: boolean;
-    enableNewsletter: boolean;
-    enableAnalytics: boolean;
-    maintenanceMode: boolean;
-  };
 }
 
+// Map UI fields -> DB keys used in your table
+const K = {
+  contactEmail: 'contact_email',
+  phone: 'contact_phone',
+  address: 'address',
+  social: {
+    instagram: 'social_instagram',
+    facebook: 'social_facebook',
+    twitter: 'social_twitter',
+    linkedin: 'social_linkedin',
+  },
+} as const;
+
 export default function Settings() {
+  // Keep your initial local defaults
   const [settings, setSettings] = useState<SiteSettings>({
-    siteName: 'Cuarto Rojo',
-    siteDescription: 'Estudio de fotografía y video profesional',
     contactEmail: 'contacto@cuartorojo.com',
     phone: '+1 234 567 890',
     address: 'Calle Principal 123, Ciudad',
@@ -48,36 +49,87 @@ export default function Settings() {
       facebook: '',
       twitter: '',
       linkedin: '',
-    },
-    seo: {
-      metaTitle: 'Cuarto Rojo - Fotografía y Video Profesional',
-      metaDescription: 'Estudio profesional de fotografía y video especializado en eventos, retratos corporativos y producción audiovisual.',
-      keywords: 'fotografía, video, estudio, profesional, eventos',
-    },
-    features: {
-      enableComments: true,
-      enableNewsletter: false,
-      enableAnalytics: true,
-      maintenanceMode: false,
-    },
+    }
   });
   const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true);
   const { toast } = useToast();
 
+  // -------- Load from Supabase on mount --------
+  useEffect(() => {
+    (async () => {
+      try {
+        const keys = [
+          K.contactEmail,
+          K.phone,
+          K.address,
+          K.social.instagram,
+          K.social.facebook,
+          K.social.twitter,
+          K.social.linkedin,
+        ];
+
+        const { data, error } = await supabase
+          .from('settings')
+          .select('key, value')
+          .in('key', keys);
+
+        if (error) throw error;
+
+        const map = new Map<string, string>();
+        (data ?? []).forEach((r: any) => map.set(r.key, r.value ?? ''));
+
+        setSettings(prev => ({
+          ...prev,
+          contactEmail: map.get(K.contactEmail) ?? prev.contactEmail,
+          phone: map.get(K.phone) ?? prev.phone,
+          address: map.get(K.address) ?? prev.address,
+          socialMedia: {
+            instagram: map.get(K.social.instagram) ?? prev.socialMedia.instagram,
+            facebook: map.get(K.social.facebook) ?? prev.socialMedia.facebook,
+            twitter: map.get(K.social.twitter) ?? prev.socialMedia.twitter,
+            linkedin: map.get(K.social.linkedin) ?? prev.socialMedia.linkedin,
+          },
+        }));
+      } catch (err: any) {
+        toast({
+          title: 'Error cargando ajustes',
+          description: err.message ?? 'No se pudieron cargar los ajustes',
+          variant: 'destructive',
+        });
+      } finally {
+        setInitializing(false);
+      }
+    })();
+  }, []);
+
+  // -------- Save to Supabase (batch upsert) --------
   const handleSave = async () => {
     try {
       setLoading(true);
-      // TODO: Implement actual save logic with database
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      
+
+      const now = new Date().toISOString();
+      const rows = [
+        { key: K.contactEmail, value: settings.contactEmail, updated_at: now },
+        { key: K.phone,        value: settings.phone,        updated_at: now },
+        { key: K.address,      value: settings.address,      updated_at: now },
+        { key: K.social.instagram, value: settings.socialMedia.instagram, updated_at: now },
+        { key: K.social.facebook,  value: settings.socialMedia.facebook,  updated_at: now },
+        { key: K.social.twitter,   value: settings.socialMedia.twitter,   updated_at: now },
+        { key: K.social.linkedin,  value: settings.socialMedia.linkedin,  updated_at: now },
+      ];
+
+      const { error } = await supabase.from('settings').upsert(rows, { onConflict: 'key' });
+      if (error) throw error;
+
       toast({
         title: 'Configuración guardada',
         description: 'Los cambios han sido guardados correctamente',
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Error',
-        description: 'No se pudieron guardar los cambios',
+        description: error.message ?? 'No se pudieron guardar los cambios',
         variant: 'destructive',
       });
     } finally {
@@ -85,21 +137,30 @@ export default function Settings() {
     }
   };
 
+  // -------- Keep your dot-path updater as-is --------
   const updateSettings = (path: string, value: any) => {
     setSettings(prev => {
       const keys = path.split('.');
       const result = { ...prev };
       let current: any = result;
-      
+
       for (let i = 0; i < keys.length - 1; i++) {
         current[keys[i]] = { ...current[keys[i]] };
         current = current[keys[i]];
       }
-      
+
       current[keys[keys.length - 1]] = value;
       return result;
     });
   };
+
+  if (initializing) {
+    return (
+      <AdminLayout>
+        <div className="p-8 text-muted-foreground">Cargando ajustes…</div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -112,69 +173,11 @@ export default function Settings() {
           </Button>
         </div>
 
-        <Tabs defaultValue="general" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="general">General</TabsTrigger>
+        <Tabs defaultValue="contact" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="contact">Contacto</TabsTrigger>
             <TabsTrigger value="social">Redes Sociales</TabsTrigger>
-            <TabsTrigger value="seo">SEO</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="general">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
-                  Información General
-                </CardTitle>
-                <CardDescription>
-                  Configuración básica del sitio web
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="siteName">Nombre del Sitio</Label>
-                  <Input
-                    id="siteName"
-                    value={settings.siteName}
-                    onChange={(e) => updateSettings('siteName', e.target.value)}
-                    placeholder="Nombre de tu estudio"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="siteDescription">Descripción</Label>
-                  <Textarea
-                    id="siteDescription"
-                    value={settings.siteDescription}
-                    onChange={(e) => updateSettings('siteDescription', e.target.value)}
-                    placeholder="Descripción de tu estudio"
-                    rows={3}
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Logo y Branding</h3>
-                  <div className="flex items-center space-x-4">
-                    <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center">
-                      <Image className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                    <div className="space-y-2">
-                      <Button variant="outline" size="sm">
-                        <Upload className="h-4 w-4 mr-2" />
-                        Subir Logo
-                      </Button>
-                      <p className="text-sm text-muted-foreground">
-                        Recomendado: 200x200px, formato PNG con fondo transparente
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           <TabsContent value="contact">
             <Card>
@@ -198,17 +201,17 @@ export default function Settings() {
                     placeholder="contacto@tudominio.com"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="phone">Teléfono</Label>
                   <Input
                     id="phone"
                     value={settings.phone}
                     onChange={(e) => updateSettings('phone', e.target.value)}
-                    placeholder="+1 234 567 890"
+                    placeholder="+502 0000 0000"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="address">Dirección</Label>
                   <Textarea
@@ -241,7 +244,7 @@ export default function Settings() {
                     placeholder="https://instagram.com/tu_usuario"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="facebook">Facebook</Label>
                   <Input
@@ -251,7 +254,7 @@ export default function Settings() {
                     placeholder="https://facebook.com/tu_pagina"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="twitter">Twitter/X</Label>
                   <Input
@@ -261,7 +264,7 @@ export default function Settings() {
                     placeholder="https://twitter.com/tu_usuario"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="linkedin">LinkedIn</Label>
                   <Input
@@ -274,59 +277,6 @@ export default function Settings() {
               </CardContent>
             </Card>
           </TabsContent>
-
-          <TabsContent value="seo">
-            <Card>
-              <CardHeader>
-                <CardTitle>Optimización SEO</CardTitle>
-                <CardDescription>
-                  Configuración para motores de búsqueda
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="metaTitle">Título Meta</Label>
-                  <Input
-                    id="metaTitle"
-                    value={settings.seo.metaTitle}
-                    onChange={(e) => updateSettings('seo.metaTitle', e.target.value)}
-                    placeholder="Título que aparece en Google"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Máximo 60 caracteres recomendados
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="metaDescription">Descripción Meta</Label>
-                  <Textarea
-                    id="metaDescription"
-                    value={settings.seo.metaDescription}
-                    onChange={(e) => updateSettings('seo.metaDescription', e.target.value)}
-                    placeholder="Descripción que aparece en Google"
-                    rows={3}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Máximo 160 caracteres recomendados
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="keywords">Palabras Clave</Label>
-                  <Input
-                    id="keywords"
-                    value={settings.seo.keywords}
-                    onChange={(e) => updateSettings('seo.keywords', e.target.value)}
-                    placeholder="palabra1, palabra2, palabra3"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Separadas por comas
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
         </Tabs>
       </div>
     </AdminLayout>

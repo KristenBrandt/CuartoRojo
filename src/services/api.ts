@@ -104,6 +104,8 @@ export const projectsService = {
         alt_text: m.alt_text || '',
         order_index: m.order_index ?? 0,
       })),
+      seo_title: project.seo_title || '',
+      seo_description: project.seo_description || '', 
       status: project.status,
       is_featured: project.featured,
       order_index: project.order_index,
@@ -148,6 +150,8 @@ export const projectsService = {
         alt_text: m.alt_text || '',
         order_index: m.order_index ?? 0,
       })),
+      seo_title: data.seo_title || '',
+      seo_description: data.seo_description || '',
       status: data.status,
       is_featured: data.featured,
       order_index: data.order_index,
@@ -175,7 +179,7 @@ export const projectsService = {
         slug,
         description: project.short_description || '',
         content: project.full_description || '',
-        category_id: (project as any).category_id || null, // <-- fix
+        category_id: (project as any).category_id || null,
         client: project.client_name || '',
         date: project.event_date || null,
         location: project.location || '',
@@ -183,7 +187,10 @@ export const projectsService = {
         status: project.status || 'draft',
         featured: project.is_featured || false,
         order_index: project.order_index || 0,
-        tags: project.tags || []
+        tags: project.tags || [],
+        // NEW
+        seo_title: project.seo_title || null,
+        seo_description: project.seo_description || null,
       })
       .select()
       .single();
@@ -213,7 +220,7 @@ export const projectsService = {
         slug: project.slug,
         description: project.short_description,
         content: project.full_description,
-        category_id: (project as any).category_id ?? undefined, // <-- allow updating FK
+        category_id: (project as any).category_id ?? undefined,
         client: project.client_name,
         date: project.event_date,
         location: project.location,
@@ -221,7 +228,9 @@ export const projectsService = {
         status: project.status,
         featured: project.is_featured,
         order_index: project.order_index,
-        tags: project.tags
+        tags: project.tags,
+        seo_title: project.seo_title,
+        seo_description: project.seo_description,
       })
       .eq('id', id);
 

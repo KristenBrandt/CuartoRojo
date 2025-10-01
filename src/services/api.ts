@@ -60,16 +60,21 @@ export const projectsService = {
       .from('projects')
       .select(`
         *,
-        category:categories(name),
+        category:categories(id, name),
         media:project_media(*)
       `)
-      .order('order_index', { ascending: false });
+      .order('order_index', { ascending: false })
+      // order nested media by order_index asc so UI shows the same order
+      .order('order_index', { ascending: true, foreignTable: 'project_media' });
 
     if (filters?.search) {
-      query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+      query = query.or(
+        `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`
+      );
     }
 
     if (filters?.category) {
+      // here we treat filters.category as the FK id
       query = query.eq('category_id', filters.category);
     }
 
@@ -78,18 +83,27 @@ export const projectsService = {
     }
 
     const { data, error } = await query;
-
     if (error) throw error;
 
-    return data.map((project: any) => ({
+    return (data || []).map((project: any) => ({
       id: project.id,
       title: project.title,
       slug: project.slug,
+      // expose both for the form:
+      // name used for display; id used for saving/filtering
       category: project.category?.name || 'Sin categoría',
+      category_id: project.category?.id || project.category_id, // keep FK handy
       short_description: project.description || '',
       full_description: project.content || '',
-      cover_image_url: project.cover_image,
-      gallery: project.media || [],
+      cover_image_url: project.cover_image || null,
+      gallery: (project.media || []).map((m: any) => ({
+        id: String(m.id),
+        project_id: m.project_id,
+        url: m.url,
+        type: m.type,               // 'image' | 'video'
+        alt_text: m.alt_text || '',
+        order_index: m.order_index ?? 0,
+      })),
       status: project.status,
       is_featured: project.featured,
       order_index: project.order_index,
@@ -108,10 +122,11 @@ export const projectsService = {
       .from('projects')
       .select(`
         *,
-        category:categories(name),
+        category:categories(id, name),
         media:project_media(*)
       `)
       .eq('id', id)
+      .order('order_index', { ascending: true, foreignTable: 'project_media' })
       .single();
 
     if (error) throw error;
@@ -121,10 +136,18 @@ export const projectsService = {
       title: data.title,
       slug: data.slug,
       category: data.category?.name || 'Sin categoría',
+      category_id: data.category?.id || data.category_id,
       short_description: data.description || '',
       full_description: data.content || '',
-      cover_image_url: data.cover_image,
-      gallery: data.media || [],
+      cover_image_url: data.cover_image || null,
+      gallery: (data.media || []).map((m: any) => ({
+        id: String(m.id),
+        project_id: m.project_id,
+        url: m.url,
+        type: m.type,
+        alt_text: m.alt_text || '',
+        order_index: m.order_index ?? 0,
+      })),
       status: data.status,
       is_featured: data.featured,
       order_index: data.order_index,
@@ -139,20 +162,24 @@ export const projectsService = {
   },
 
   async createProject(project: Partial<AdminProject>): Promise<AdminProject> {
-    const slug = project.slug || project.title?.toLowerCase().replace(/\s+/g, '-') || '';
-    
+    const slug =
+      project.slug ||
+      project.title?.toLowerCase().replace(/\s+/g, '-') ||
+      '';
+
+    // IMPORTANT: write the category_id FK you’re tracking in the form
     const { data, error } = await supabase
       .from('projects')
       .insert({
         title: project.title || '',
         slug,
-        description: project.short_description,
-        content: project.full_description,
-        category_id: null, // TODO: Map category name to ID
-        client: project.client_name,
-        date: project.event_date,
-        location: project.location,
-        cover_image: project.cover_image_url,
+        description: project.short_description || '',
+        content: project.full_description || '',
+        category_id: (project as any).category_id || null, // <-- fix
+        client: project.client_name || '',
+        date: project.event_date || null,
+        location: project.location || '',
+        cover_image: project.cover_image_url || null,
         status: project.status || 'draft',
         featured: project.is_featured || false,
         order_index: project.order_index || 0,
@@ -162,6 +189,18 @@ export const projectsService = {
       .single();
 
     if (error) throw error;
+
+    // if there’s a gallery in payload, persist it now
+    if (project.gallery?.length) {
+      await this.saveProjectMedia(data.id, project.gallery);
+    }
+
+    // set cover if not provided but gallery exists
+    if (!data.cover_image && project.gallery?.length) {
+      await supabase.from('projects')
+        .update({ cover_image: project.gallery[0].url })
+        .eq('id', data.id);
+    }
 
     return this.getProject(data.id);
   },
@@ -174,6 +213,7 @@ export const projectsService = {
         slug: project.slug,
         description: project.short_description,
         content: project.full_description,
+        category_id: (project as any).category_id ?? undefined, // <-- allow updating FK
         client: project.client_name,
         date: project.event_date,
         location: project.location,
@@ -187,15 +227,20 @@ export const projectsService = {
 
     if (error) throw error;
 
+    // sync media if caller passed it
+    if (project.gallery) {
+      await this.saveProjectMedia(id, project.gallery);
+    }
+
     return this.getProject(id);
   },
 
   async deleteProject(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('projects')
-      .delete()
-      .eq('id', id);
+    // optional: delete media rows first (FK on cascade would also handle)
+    const { error: mErr } = await supabase.from('project_media').delete().eq('project_id', id);
+    if (mErr) throw mErr;
 
+    const { error } = await supabase.from('projects').delete().eq('id', id);
     if (error) throw error;
   },
 
@@ -205,12 +250,12 @@ export const projectsService = {
         .from('projects')
         .update({ order_index: project.order_index })
         .eq('id', project.id);
-
       if (error) throw error;
     }
   },
 
-  async uploadMedia(file: File): Promise<{ url: string }> {
+  // === STORAGE (keeps as-is) ===
+  async uploadMedia(file: File): Promise<{ url: string, path: string, mime: string }> {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
     const filePath = `${fileName}`;
@@ -221,19 +266,53 @@ export const projectsService = {
 
     if (uploadError) throw uploadError;
 
-    const { data } = supabase.storage
-      .from('project-media')
-      .getPublicUrl(filePath);
+    const { data } = supabase.storage.from('project-media').getPublicUrl(filePath);
 
-    return { url: data.publicUrl };
-  }
+    return { url: data.publicUrl, path: filePath, mime: file.type };
+  },
+
+  // === NEW: persist/replace rows in project_media ===
+  async saveProjectMedia(projectId: string, gallery: AdminProject['gallery']): Promise<void> {
+    // Load existing rows to diff (by id or url)
+    const { data: existing, error: exErr } = await supabase
+      .from('project_media')
+      .select('id,url');
+    if (exErr) throw exErr;
+
+    const keepUrls = new Set((gallery || []).map(g => g.url));
+    const existingForProject = (existing || []).filter(r => r.project_id === projectId);
+
+    // Delete removed rows
+    const toDelete = existingForProject.filter(r => !keepUrls.has(r.url));
+    if (toDelete.length) {
+      const { error: delErr } = await supabase
+        .from('project_media')
+        .delete()
+        .in('id', toDelete.map(r => r.id));
+      if (delErr) throw delErr;
+    }
+
+    // Upsert (insert new or update existing)
+    const rows = (gallery || []).map((g, idx) => ({
+      // if you have PK id numeric, omit id for new rows
+      project_id: projectId,
+      url: g.url,
+      type: g.type,
+      alt_text: g.alt_text || '',
+      order_index: idx
+    }));
+
+    const { error: upErr } = await supabase
+      .from('project_media')
+      .upsert(rows, { onConflict: 'project_id,url' }); // assumes unique(project_id,url)
+    if (upErr) throw upErr;
+  },
 };
 
 export const usersService = {
   async getUsers(): Promise<User[]> {
-    // Use a proper view or explicit join
     const { data, error } = await supabase
-      .from('app_users_v') // sql view
+      .from('app_users_v') // view
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -243,7 +322,7 @@ export const usersService = {
       id: u.id,
       name: u.name || u.email,
       email: u.email,
-      role: u.role,              // always 'admin' for new users
+      role: u.role,
       created_at: u.created_at,
       updated_at: u.updated_at ?? null, 
       is_active: u.is_active ?? true,
@@ -251,7 +330,6 @@ export const usersService = {
   },
 
   async createUser(user: { name: string; email: string; password: string; is_active?: boolean }): Promise<User> {
-    // Must go through your API route that uses the service key
     const res = await fetch('/api/admin/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -273,28 +351,24 @@ export const usersService = {
   },
 
   async updateUser(id: string, user: Partial<User>): Promise<User> {
-      const { error } = await supabase.rpc('admin_update_user', {
-        p_id: id,
-        p_name: user.name ?? null,
-        p_role: user.role ?? null,
-        p_is_active: typeof user.is_active === 'boolean' ? user.is_active : null,
-      });
-      if (error) throw error;
-
+    const { error } = await supabase.rpc('admin_update_user', {
+      p_id: id,
+      p_name: user.name ?? null,
+      p_role: user.role ?? null,
+      p_is_active: typeof user.is_active === 'boolean' ? user.is_active : null,
+    });
+    if (error) throw error;
 
     const users = await this.getUsers();
     return users.find(u => u.id === id)!;
   },
 
   async deleteUser(id: string): Promise<void> {
-    // Deleting from profiles won’t delete from auth.users
-    // Better: call your API route with service key
     const res = await fetch(`/api/admin/users?id=${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error('Delete failed');
   },
 
   async resetUserPassword(email: string): Promise<void> {
-    // Must go through your API route with service key
     const res = await fetch('/api/admin/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -374,6 +448,29 @@ export const categoriesService = {
       updated_at: cat.updated_at
     }));
   },
+
+  async getActive(): Promise<Category[]> {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('is_active', true)   // ✅ only active
+      .order('name');
+
+    if (error) throw error;
+
+    return (data ?? []).map(cat => ({
+      id: cat.id,
+      name: cat.name,
+      slug: cat.slug,
+      description: cat.description || '',
+      color: cat.color,
+      is_active: cat.is_active,
+      project_count: cat.project_count,
+      created_at: cat.created_at,
+      updated_at: cat.updated_at
+    }));
+  },
+
 
   async createCategory(category: CreateCategoryForm): Promise<Category> {
     const slug = category.name.toLowerCase().replace(/\s+/g, '-');

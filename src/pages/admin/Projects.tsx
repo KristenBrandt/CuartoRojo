@@ -43,14 +43,49 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from '@/hooks/use-toast';
 
+// NEW: categories service (reads only active)
+import { categoriesService } from '@/services/api';
+type Category = {
+  id: string;
+  name: string;
+  slug?: string | null;
+  is_active?: boolean | null;
+  active?: boolean | null;
+  status?: string | null;
+};
+
 export default function Projects() {
   const [projects, setProjects] = useState<AdminProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<ProjectFilters>({});
 
+  // NEW: categories state
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [catsLoading, setCatsLoading] = useState(true);
+
   useEffect(() => {
     loadProjects();
   }, [filters]);
+
+  useEffect(() => {
+    // load active categories once
+    (async () => {
+      try {
+        setCatsLoading(true);
+        const data = await categoriesService.getActive();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        toast({
+          title: 'Error',
+          description: 'No se pudieron cargar las categorías',
+          variant: 'destructive',
+        });
+      } finally {
+        setCatsLoading(false);
+      }
+    })();
+  }, []);
 
   const loadProjects = async () => {
     try {
@@ -138,23 +173,38 @@ export default function Projects() {
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             />
           </div>
+
+          {/* Category filter fed by Supabase (active only) */}
           <Select
             value={filters.category || 'all'}
-            onValueChange={(value) => 
+            onValueChange={(value) =>
               setFilters({ ...filters, category: value === 'all' ? undefined : value })
             }
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[220px]">
               <SelectValue placeholder="Categoría" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas las categorías</SelectItem>
-              <SelectItem value="Logística">Logística</SelectItem>
-              <SelectItem value="Cobertura">Cobertura</SelectItem>
-              <SelectItem value="Food Styling">Food Styling</SelectItem>
-              <SelectItem value="Otro">Otro</SelectItem>
+              {catsLoading ? (
+                <SelectItem value="__loading" disabled>
+                  Cargando…
+                </SelectItem>
+              ) : categories.length ? (
+                // We keep using category NAME so your existing API keeps working
+                categories.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))
+              ) : (
+                <SelectItem value="__empty" disabled>
+                  No hay categorías activas
+                </SelectItem>
+              )}
             </SelectContent>
           </Select>
+
           <Select
             value={filters.status || 'all'}
             onValueChange={(value) => 
@@ -309,5 +359,7 @@ export default function Projects() {
         </div>
       </div>
     </AdminLayout>
-  );
+  )
 }
+
+

@@ -199,3 +199,39 @@ export interface CreateCategoryForm {
   color: string;
   is_active: boolean;
 }
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  avatar: string;
+  social?: {
+    instagram?: string;
+    linkedin?: string;
+    behance?: string;
+  };
+}
+
+export interface AdminTeamMember {
+  id: string;
+  name: string;
+  role: string;
+  bio: string | null;
+  avatar: string | null;
+  social_instagram: string | null;
+  social_linkedin: string | null;
+  social_behance: string | null;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateTeamMemberForm {
+  name: string;
+  role: string;
+  bio?: string;
+  avatar?: string;
+  social_instagram?: string;
+  social_linkedin?: string;
+  social_behance?: string;
+}

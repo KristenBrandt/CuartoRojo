@@ -12,7 +12,9 @@ import {
   LoginForm,
   AuthUser,
   Category,
-  CreateCategoryForm
+  CreateCategoryForm,
+  AdminTeamMember,
+  CreateTeamMemberForm
 } from '@/types';
 
 // Elimina claves con `undefined` para no pisar columnas en Supabase
@@ -625,5 +627,98 @@ export const categoriesService = {
       .eq('id', id);
 
     if (error) throw error;
+  }
+};
+
+export const teamService = {
+  async getTeamMembers(): Promise<AdminTeamMember[]> {
+    const { data, error } = await supabase
+      .from('team_members')
+      .select('*')
+      .order('order_index', { ascending: true });
+
+    if (error) throw error;
+
+    return data || [];
+  },
+
+  async getTeamMember(id: string): Promise<AdminTeamMember> {
+    const { data, error } = await supabase
+      .from('team_members')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    if (!data) throw new Error('Team member not found');
+
+    return data;
+  },
+
+  async createTeamMember(member: CreateTeamMemberForm): Promise<AdminTeamMember> {
+    const { data, error } = await supabase
+      .from('team_members')
+      .insert({
+        name: member.name,
+        role: member.role,
+        bio: member.bio || null,
+        avatar: member.avatar || null,
+        social_instagram: member.social_instagram || null,
+        social_linkedin: member.social_linkedin || null,
+        social_behance: member.social_behance || null
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    if (!data) throw new Error('Failed to create team member');
+
+    return data;
+  },
+
+  async updateTeamMember(id: string, member: Partial<CreateTeamMemberForm>): Promise<AdminTeamMember> {
+    const { error } = await supabase
+      .from('team_members')
+      .update({
+        name: member.name,
+        role: member.role,
+        bio: member.bio,
+        avatar: member.avatar,
+        social_instagram: member.social_instagram,
+        social_linkedin: member.social_linkedin,
+        social_behance: member.social_behance
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+
+    return this.getTeamMember(id);
+  },
+
+  async deleteTeamMember(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('team_members')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  },
+
+  async uploadAvatar(file: File): Promise<{ url: string }> {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('team-avatars')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('team-avatars')
+      .getPublicUrl(filePath);
+
+    return { url: data.publicUrl };
   }
 };

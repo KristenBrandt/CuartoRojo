@@ -18,6 +18,7 @@ import Users from "./pages/admin/Users";
 import Settings from "./pages/admin/Settings";
 import ProjectForm from "./pages/admin/ProjectForm";
 import Categories from "./pages/admin/Categories";
+import Team from "./pages/admin/Team";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -65,6 +66,11 @@ const App = () => (
             <Route path="/admin/categorias" element={
               <AuthGuard>
                 <Categories />
+              </AuthGuard>
+            } />
+            <Route path="/admin/equipo" element={
+              <AuthGuard>
+                <Team />
               </AuthGuard>
             } />
             <Route path="/admin/usuarios" element={

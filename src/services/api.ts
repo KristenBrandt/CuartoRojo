@@ -15,6 +15,20 @@ import {
   CreateCategoryForm
 } from '@/types';
 
+// Elimina claves con `undefined` para no pisar columnas en Supabase
+const clean = <T extends Record<string, any>>(obj: T) =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
+
+// helper
+const toDateInput = (isoOrNull: string | null | undefined) =>
+  isoOrNull ? isoOrNull.slice(0, 10) : null;
+
+// api.ts (near the clean helper)
+const nullIfBlank = <T extends string | null | undefined>(v: T) =>
+  (typeof v === 'string' && v.trim() === '') ? null : v;
+
+
+
 export const authService = {
   async login(credentials: LoginForm): Promise<{ user: AuthUser; token: string }> {
     // TODO: Replace with actual API call
@@ -182,9 +196,9 @@ export const projectsService = {
         slug,
         description: project.short_description || '',
         content: project.full_description || '',
-        category_id: (project as any).category_id || null,
+        category_id: project.category_id ?? null,
         client: project.client_name || '',
-        date: project.event_date || null,
+        date: nullIfBlank(project.event_date),
         location: project.location || '',
         cover_image: project.cover_image_url || null,
         status: project.status || 'draft',
@@ -216,36 +230,67 @@ export const projectsService = {
   },
 
   async updateProject(id: string, project: Partial<AdminProject>): Promise<AdminProject> {
+    const patch = clean({
+      title: project.title,
+      slug: project.slug,
+      description: project.short_description,
+      content: project.full_description,
+      category_id: project.category_id,
+      client: project.client_name,
+      date: nullIfBlank(project.event_date),   // ✅ never send ""
+      location: project.location,
+      cover_image: project.cover_image_url,
+      status: project.status,
+      featured: project.is_featured,
+      order_index: project.order_index,
+      tags: project.tags,
+      seo_title: project.seo_title,
+      seo_description: project.seo_description,
+    });
+
+    // ⚠️ PostgREST responde 400 si patch es {}
+    if (Object.keys(patch).length === 0 && !project.gallery) {
+      // nada que actualizar; solo devuelve el proyecto
+      return this.getProject(id);
+    }
+
+    // Añade .select() para forzar retorno y poder ver error completo si ocurre
     const { error } = await supabase
       .from('projects')
-      .update({
-        title: project.title,
-        slug: project.slug,
-        description: project.short_description,
-        content: project.full_description,
-        category_id: (project as any).category_id ?? undefined,
-        client: project.client_name,
-        date: project.event_date,
-        location: project.location,
-        cover_image: project.cover_image_url,
-        status: project.status,
-        featured: project.is_featured,
-        order_index: project.order_index,
-        tags: project.tags,
-        seo_title: project.seo_title,
-        seo_description: project.seo_description,
-      })
-      .eq('id', id);
+      .update(patch)
+      .eq('id', id)
+      .select();  // <= útil para depurar
 
-    if (error) throw error;
+    if (error) {
+      // imprime TODO lo que devuelve PostgREST
+      console.error('updateProject error:', {
+        message: error.message,
+        details: (error as any).details,
+        hint: (error as any).hint,
+        code: (error as any).code,
+        patch
+      });
+      throw error;
+    }
 
-    // sync media if caller passed it
     if (project.gallery) {
       await this.saveProjectMedia(id, project.gallery);
+
+      const stillExists = project.cover_image_url
+        ? project.gallery.some(g => g.url === project.cover_image_url)
+        : true;
+
+      if (!stillExists) {
+        await supabase
+          .from('projects')
+          .update({ cover_image: project.gallery[0]?.url ?? null })
+          .eq('id', id);
+      }
     }
 
     return this.getProject(id);
   },
+
 
   async deleteProject(id: string): Promise<void> {
     // optional: delete media rows first (FK on cascade would also handle)
@@ -282,45 +327,62 @@ export const projectsService = {
     return { url: data.publicUrl, path: filePath, mime: file.type };
   },
 
+
   async saveProjectMedia(projectId: string, gallery: AdminProject['gallery']): Promise<void> {
-  // Only fetch rows for THIS project, and include project_id since we use it
-  const { data: existing, error: exErr } = await supabase
-    .from('project_media')
-    .select('id, project_id, url')
-    .eq('project_id', projectId);
-
-  if (exErr) throw exErr;
-
-  // Compare by URL (since you upsert on project_id,url)
-  const keepUrls = new Set((gallery || []).map(g => g.url));
-  const existingForProject = existing || [];
-
-  // Delete removed rows for this project
-  const toDelete = existingForProject.filter(r => !keepUrls.has(r.url));
-  if (toDelete.length) {
-    const { error: delErr } = await supabase
+    // 1) Read existing for THIS project
+    const { data: existing, error: exErr } = await supabase
       .from('project_media')
-      .delete()
-      .in('id', toDelete.map(r => r.id));
-    if (delErr) throw delErr;
+      .select('id, project_id, url');
+      // .eq('project_id', projectId);  // <= keep this filter!
+    if (exErr) throw exErr;
+
+    const current = (existing ?? []).filter(r => r.project_id === projectId); // safety if RLS returns more
+    const desired = (gallery ?? []).map((g, idx) => ({
+      project_id: projectId,
+      url: g.url,
+      type: g.type,              // must match your DB’s accepted values
+      alt_text: g.alt_text || '',
+      order_index: idx,
+    }));
+
+    const currentUrls = new Set(current.map(e => e.url));
+    const desiredUrls = new Set(desired.map(d => d.url));
+
+    // 2) Delete rows no longer present
+    const toDelete = current.filter(r => !desiredUrls.has(r.url));
+    if (toDelete.length) {
+      const { error: delErr } = await supabase
+        .from('project_media')
+        .delete()
+        .in('id', toDelete.map(r => r.id));
+      if (delErr) throw delErr;
+    }
+
+    // 3) Update rows that still exist (by composite key)
+    const toUpdate = desired.filter(d => currentUrls.has(d.url));
+    for (const r of toUpdate) {
+      const { error: updErr } = await supabase
+        .from('project_media')
+        .update({
+          type: r.type,
+          alt_text: r.alt_text,
+          order_index: r.order_index,
+        })
+        .eq('project_id', r.project_id)
+        .eq('url', r.url);
+      if (updErr) throw updErr;
+    }
+
+    // 4) Insert new rows
+    const toInsert = desired.filter(d => !currentUrls.has(d.url));
+    if (toInsert.length) {
+      const { error: insErr } = await supabase
+        .from('project_media')
+        .insert(toInsert);
+      if (insErr) throw insErr;
+    }
   }
 
-  // Upsert (insert/update) the current in-memory ordering & fields
-  const rows = (gallery || []).map((g, idx) => ({
-    project_id: projectId,
-    url: g.url,
-    type: g.type,
-    alt_text: g.alt_text || '',
-    order_index: idx,
-  }));
-
-  // ⚠️ Requires a unique index on (project_id, url) in project_media
-  const { error: upErr } = await supabase
-    .from('project_media')
-    .upsert(rows, { onConflict: 'project_id,url' });
-
-  if (upErr) throw upErr;
-  }
 };
 
 export const usersService = {

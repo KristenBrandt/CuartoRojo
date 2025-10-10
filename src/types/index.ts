@@ -105,7 +105,8 @@ export interface AdminProject {
   id: string;
   title: string;
   slug: string;
-  category: 'Logística' | 'Cobertura' | 'Food Styling' | 'Otro';
+  category: string;           // ← nombre para mostrar (del join)
+  category_id?: string | null; // ← FK real para guardar
   short_description: string;
   full_description: string;
   cover_image_url: string | null;
@@ -120,9 +121,9 @@ export interface AdminProject {
   created_at: string;
   updated_at: string;
   published_at: string | null;
-  seo_title?: string;
-  seo_description?: string;
-  canonical_url?: string;
+  seo_title?: string | null;
+  seo_description?: string | null;
+  canonical_url?: string | null;
 }
 
 export interface ProjectMedia {

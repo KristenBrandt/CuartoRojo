@@ -41,9 +41,7 @@ export default function ProjectForm() {
     full_description: '',
     // your service currently returns category NAME only.
     category: undefined,
-    // we'll also track the foreign key here (not in your type yet)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...( {} as any ),
+    category_id: undefined,
     gallery: [],
     client_name: '',
     event_date: '',
@@ -53,7 +51,7 @@ export default function ProjectForm() {
     seo_title: '',
     seo_description: '',
     tags: [],
-    cover_image_url: undefined,
+    cover_image_url: null,
   });
 
   const [loading, setLoading] = useState(false);
@@ -78,7 +76,7 @@ export default function ProjectForm() {
 
         // If editing and we only have the category name, try to find its id
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const category_id = (project as any)?.category_id as string | undefined;
+        const category_id = project.category_id ?? undefined;
         if (isEdit && project.category && !category_id) {
           const match = active.find(c => c.name === project.category);
           if (match) {
@@ -117,8 +115,7 @@ export default function ProjectForm() {
   };
 
   const validate = () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const catId = (project as any).category_id as string | undefined;
+    const catId = project.category_id ?? undefined;
     if (!project.title || !catId) {
       toast({
         title: 'Error',
@@ -295,16 +292,12 @@ export default function ProjectForm() {
                   <div className="space-y-2">
                     <Label htmlFor="category">Categoría *</Label>
                     <Select
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      value={(project as any).category_id || undefined}
+                      value={project.category_id ?? undefined}
                       onValueChange={(value) => {
                         const picked = cats.find(c => c.id === value);
                         setProject(prev => ({
                           ...prev,
-                          // store id (your getProjects uses category_id filter)
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          category_id: value as any,
-                          // keep name for display/back-compat
+                          category_id: value,
                           category: picked?.name || prev.category,
                         }));
                       }}
@@ -365,7 +358,7 @@ export default function ProjectForm() {
                     <Input
                       id="event_date"
                       type="date"
-                      value={project.event_date || ''}
+                      value={project.event_date ?? ''}
                       onChange={(e) => setProject(prev => ({ ...prev, event_date: e.target.value }))}
                     />
                   </div>

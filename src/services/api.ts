@@ -1,4 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
+const FN_BASE = import.meta.env.VITE_FN_BASE; // "https://anlryfbwwyrqtbcqrhhs.functions.supabase.co"
+const ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
 import { 
   AdminProject, 
   User, 
@@ -263,7 +266,6 @@ export const projectsService = {
     }
   },
 
-  // === STORAGE (keeps as-is) ===
   async uploadMedia(file: File): Promise<{ url: string, path: string, mime: string }> {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -280,42 +282,45 @@ export const projectsService = {
     return { url: data.publicUrl, path: filePath, mime: file.type };
   },
 
-  // === NEW: persist/replace rows in project_media ===
   async saveProjectMedia(projectId: string, gallery: AdminProject['gallery']): Promise<void> {
-    // Load existing rows to diff (by id or url)
-    const { data: existing, error: exErr } = await supabase
+  // Only fetch rows for THIS project, and include project_id since we use it
+  const { data: existing, error: exErr } = await supabase
+    .from('project_media')
+    .select('id, project_id, url')
+    .eq('project_id', projectId);
+
+  if (exErr) throw exErr;
+
+  // Compare by URL (since you upsert on project_id,url)
+  const keepUrls = new Set((gallery || []).map(g => g.url));
+  const existingForProject = existing || [];
+
+  // Delete removed rows for this project
+  const toDelete = existingForProject.filter(r => !keepUrls.has(r.url));
+  if (toDelete.length) {
+    const { error: delErr } = await supabase
       .from('project_media')
-      .select('id,url');
-    if (exErr) throw exErr;
+      .delete()
+      .in('id', toDelete.map(r => r.id));
+    if (delErr) throw delErr;
+  }
 
-    const keepUrls = new Set((gallery || []).map(g => g.url));
-    const existingForProject = (existing || []).filter(r => r.project_id === projectId);
+  // Upsert (insert/update) the current in-memory ordering & fields
+  const rows = (gallery || []).map((g, idx) => ({
+    project_id: projectId,
+    url: g.url,
+    type: g.type,
+    alt_text: g.alt_text || '',
+    order_index: idx,
+  }));
 
-    // Delete removed rows
-    const toDelete = existingForProject.filter(r => !keepUrls.has(r.url));
-    if (toDelete.length) {
-      const { error: delErr } = await supabase
-        .from('project_media')
-        .delete()
-        .in('id', toDelete.map(r => r.id));
-      if (delErr) throw delErr;
-    }
+  // ⚠️ Requires a unique index on (project_id, url) in project_media
+  const { error: upErr } = await supabase
+    .from('project_media')
+    .upsert(rows, { onConflict: 'project_id,url' });
 
-    // Upsert (insert new or update existing)
-    const rows = (gallery || []).map((g, idx) => ({
-      // if you have PK id numeric, omit id for new rows
-      project_id: projectId,
-      url: g.url,
-      type: g.type,
-      alt_text: g.alt_text || '',
-      order_index: idx
-    }));
-
-    const { error: upErr } = await supabase
-      .from('project_media')
-      .upsert(rows, { onConflict: 'project_id,url' }); // assumes unique(project_id,url)
-    if (upErr) throw upErr;
-  },
+  if (upErr) throw upErr;
+  }
 };
 
 export const usersService = {
@@ -339,16 +344,26 @@ export const usersService = {
   },
 
   async createUser(user: { name: string; email: string; password: string; is_active?: boolean }): Promise<User> {
-    const res = await fetch('/api/admin/users', {
+    const res = await fetch(`${FN_BASE}/admin-users`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${ANON_KEY}`, },
       body: JSON.stringify({ type: 'create', payload: user }),
     });
 
-    if (!res.ok) throw new Error('Create failed');
+    if (!res.ok) {
+      const msg = await res.text();           // helpful for debugging
+      console.error('createUser failed:', msg);
+      throw new Error('Create failed');
+    }
+
     const { user: created } = await res.json();
 
-    return {
+    // Re-read from your view so joins/metadata are accurate
+    const fresh = await this.getUsers();
+    const row = fresh.find(u => u.id === created.id);
+    return row ?? {
       id: created.id,
       name: user.name,
       email: user.email,
@@ -358,6 +373,7 @@ export const usersService = {
       is_active: user.is_active ?? true,
     };
   },
+
 
   async updateUser(id: string, user: Partial<User>): Promise<User> {
     const { error } = await supabase.rpc('admin_update_user', {
@@ -373,9 +389,21 @@ export const usersService = {
   },
 
   async deleteUser(id: string): Promise<void> {
-    const res = await fetch(`/api/admin/users?id=${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error('Delete failed');
+    const res = await fetch(`${FN_BASE}/admin-users?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      // If your function has verify_jwt = true, keep this header:
+      headers: {
+        'Authorization': `Bearer ${ANON_KEY}`,
+      },
+    });
+
+    if (!res.ok) {
+      const msg = await res.text();
+      console.error('deleteUser failed:', msg);
+      throw new Error('Delete failed');
+    }
   },
+
 
   async resetUserPassword(email: string): Promise<void> {
     const res = await fetch('/api/admin/users', {

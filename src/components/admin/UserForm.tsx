@@ -23,7 +23,7 @@ export function UserForm({ user, onSave }: UserFormProps) {
   const [formData, setFormData] = useState<CreateUserForm>({
     name: user?.name || '',
     email: user?.email || '',
-    role: user?.role || 'admin',
+    role: 'admin',
     is_active: user?.is_active ?? true,
     password: '',
   });
@@ -59,7 +59,6 @@ export function UserForm({ user, onSave }: UserFormProps) {
         // 🔹 Edit existing user
         savedUser = await usersService.updateUser(user.id, {
           name: formData.name,
-          role: formData.role,
           is_active: formData.is_active,
         });
       } else {
@@ -69,6 +68,7 @@ export function UserForm({ user, onSave }: UserFormProps) {
           email: formData.email,
           password: formData.password,
           is_active: formData.is_active,
+
         });
       }
 
@@ -137,25 +137,6 @@ export function UserForm({ user, onSave }: UserFormProps) {
         </div>
       )}
 
-      {/* Role */}
-      <div className="space-y-2">
-        <Label htmlFor="role">Rol</Label>
-        <Select
-          value={formData.role}
-          onValueChange={(value: 'admin' | 'editor' | 'viewer') =>
-            setFormData({ ...formData, role: value })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Seleccionar rol" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="admin">Administrador</SelectItem>
-            <SelectItem value="editor">Editor</SelectItem>
-            <SelectItem value="viewer">Usuario</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
 
       {/* Active toggle */}
       <div className="flex items-center space-x-2">

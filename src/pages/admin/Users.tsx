@@ -58,39 +58,31 @@ export default function Users() {
     }
   };
 
-  const handleDeleteUser = async (id: string) => {
+  const handleDeleteUser = async (id: string) => {  // <— expects id
     if (!confirm('¿Está seguro de que desea eliminar este usuario?')) return;
-    
     try {
       await usersService.deleteUser(id);
-      setUsers(users.filter(user => user.id !== id));
-      toast({
-        title: 'Usuario eliminado',
-        description: 'El usuario ha sido eliminado correctamente',
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'No se pudo eliminar el usuario',
-        variant: 'destructive',
-      });
+      setUsers(prev => prev.filter(u => u.id !== id));
+      toast({ title: 'Usuario eliminado', description: 'El usuario ha sido eliminado correctamente' });
+    } catch {
+      toast({ title: 'Error', description: 'No se pudo eliminar el usuario', variant: 'destructive' });
     }
   };
-
+  
   const handleResetPassword = async (email: string) => {
     try {
       await usersService.resetUserPassword(email);
-      toast({
-        title: 'Contraseña restablecida',
-        description: 'Se ha enviado un email con la nueva contraseña',
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'No se pudo restablecer la contraseña',
-        variant: 'destructive',
-      });
+      toast({ title: 'Contraseña restablecida', description: 'Se envió el correo de recuperación' });
+    } catch {
+      toast({ title: 'Error', description: 'No se pudo restablecer la contraseña', variant: 'destructive' });
     }
+  };
+
+  const handleUserSaved = async (_saved: User) => {
+    // safest: reload from the view so roles/joins reflect
+    await loadUsers();
+    setIsCreateModalOpen(false);
+    setEditingUser(null);
   };
 
   const filteredUsers = users.filter(user =>
@@ -98,15 +90,6 @@ export default function Users() {
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleUserSaved = (savedUser: User) => {
-    if (editingUser) {
-      setUsers(users.map(user => user.id === savedUser.id ? savedUser : user));
-    } else {
-      setUsers([...users, savedUser]);
-    }
-    setIsCreateModalOpen(false);
-    setEditingUser(null);
-  };
 
   return (
     <AdminLayout>
@@ -148,7 +131,6 @@ export default function Users() {
               <TableRow>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Rol</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Fecha de Creación</TableHead>
                 <TableHead className="w-[70px]"></TableHead>
@@ -157,13 +139,13 @@ export default function Users() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell colSpan={5} className="text-center py-8">
                     Cargando usuarios...
                   </TableCell>
                 </TableRow>
               ) : filteredUsers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                     No se encontraron usuarios
                   </TableCell>
                 </TableRow>
@@ -172,11 +154,6 @@ export default function Users() {
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                        {user.role === 'admin' ? 'Administrador' : 'Usuario'}
-                      </Badge>
-                    </TableCell>
                     <TableCell>
                       <Badge variant={user.is_active ? 'default' : 'destructive'}>
                         {user.is_active ? 'Activo' : 'Inactivo'}
@@ -209,7 +186,7 @@ export default function Users() {
                             Restablecer Contraseña
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleDeleteUser(user.email)}
+                            onClick={() => handleDeleteUser(user.id)}
                             className="text-destructive"
                           >
                             <UserX className="mr-2 h-4 w-4" />

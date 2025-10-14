@@ -17,6 +17,12 @@ import {
   CreateTeamMemberForm
 } from '@/types';
 
+function publicUrlFrom(bucket: string | null | undefined, path: string | null | undefined) {
+  if (!path) return null;
+  const b = bucket || 'project-media';
+  return supabase.storage.from(b).getPublicUrl(path).data.publicUrl;
+}
+
 // Elimina claves con `undefined` para no pisar columnas en Supabase
 const clean = <T extends Record<string, any>>(obj: T) =>
   Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
@@ -29,6 +35,9 @@ const toDateInput = (isoOrNull: string | null | undefined) =>
 const nullIfBlank = <T extends string | null | undefined>(v: T) =>
   (typeof v === 'string' && v.trim() === '') ? null : v;
 
+
+// put this near projectsService.uploadMedia
+const MAX_BYTES = 50 * 1024 * 1024; // match your plan/global setting (e.g., 50MB on Free)
 
 
 export const authService = {
@@ -115,14 +124,27 @@ export const projectsService = {
       short_description: project.description || '',
       full_description: project.content || '',
       cover_image_url: project.cover_image || null,
-      gallery: (project.media || []).map((m: any) => ({
-        id: String(m.id),
-        project_id: m.project_id,
-        url: m.url,
-        type: m.type,               // 'image' | 'video'
-        alt_text: m.alt_text || '',
-        order_index: m.order_index ?? 0,
-      })),
+      gallery: (project.media || []).map((m: any) => {
+        const computed = m.path
+          ? supabase.storage
+              .from(m.bucket || 'project-media')
+              .getPublicUrl(m.path).data.publicUrl
+          : null;
+
+        return {
+          id: String(m.id),
+          project_id: m.project_id,
+          url: computed || m.url,
+          type: m.type,
+          alt_text: m.alt_text || '',
+          order_index: m.order_index ?? 0,
+
+          path: m.path,
+          bucket: m.bucket || 'project-media',
+          mime: m.mime,
+          size: m.size_bytes,
+        };
+      }),
       seo_title: project.seo_title || '',
       seo_description: project.seo_description || '', 
       status: project.status,
@@ -161,14 +183,29 @@ export const projectsService = {
       short_description: data.description || '',
       full_description: data.content || '',
       cover_image_url: data.cover_image || null,
-      gallery: (data.media || []).map((m: any) => ({
-        id: String(m.id),
-        project_id: m.project_id,
-        url: m.url,
-        type: m.type,
-        alt_text: m.alt_text || '',
-        order_index: m.order_index ?? 0,
-      })),
+      gallery: (data.media || []).map((m: any) => {
+        const computed = m.path
+          ? supabase.storage
+              .from(m.bucket || 'project-media')
+              .getPublicUrl(m.path).data.publicUrl
+          : null;
+
+        return {
+          id: String(m.id),
+          project_id: m.project_id,
+          // ✅ prefer Storage-derived URL, else legacy url
+          url: computed || m.url,
+          type: m.type,               // 'image' | 'video'
+          alt_text: m.alt_text || '',
+          order_index: m.order_index ?? 0,
+
+          // keep raw fields for future saves:
+          path: m.path,
+          bucket: m.bucket || 'project-media',
+          mime: m.mime,
+          size: m.size_bytes,
+        };
+      }),
       seo_title: data.seo_title || '',
       seo_description: data.seo_description || '',
       status: data.status,
@@ -214,6 +251,7 @@ export const projectsService = {
       .select()
       .single();
 
+
     if (error) throw error;
 
     // if there’s a gallery in payload, persist it now
@@ -221,11 +259,19 @@ export const projectsService = {
       await this.saveProjectMedia(data.id, project.gallery);
     }
 
-    // set cover if not provided but gallery exists
+    // set cover if not provided but gallery exists (prefer storage path)
     if (!data.cover_image && project.gallery?.length) {
-      await supabase.from('projects')
-        .update({ cover_image: project.gallery[0].url })
-        .eq('id', data.id);
+      const first = project.gallery[0] as any;
+      const coverUrl = first.path
+        ? supabase.storage.from('project-media').getPublicUrl(first.path).data.publicUrl
+        : first.url || null;
+
+      if (coverUrl) {
+        await supabase
+          .from('projects')
+          .update({ cover_image: coverUrl })
+          .eq('id', data.id);
+      }
     }
 
     return this.getProject(data.id);
@@ -239,7 +285,7 @@ export const projectsService = {
       content: project.full_description,
       category_id: project.category_id,
       client: project.client_name,
-      date: nullIfBlank(project.event_date),   // ✅ never send ""
+      date: nullIfBlank(project.event_date),
       location: project.location,
       cover_image: project.cover_image_url,
       status: project.status,
@@ -250,21 +296,24 @@ export const projectsService = {
       seo_description: project.seo_description,
     });
 
-    // ⚠️ PostgREST responde 400 si patch es {}
-    if (Object.keys(patch).length === 0 && !project.gallery) {
-      // nada que actualizar; solo devuelve el proyecto
+    const hasGallery = Array.isArray(project.gallery);
+
+    // ✅ Si no hay cambios en projects, pero sí en gallery, solo persiste medios
+    if (Object.keys(patch).length === 0) {
+      if (hasGallery) {
+        await this.saveProjectMedia(id, project.gallery!);
+      }
       return this.getProject(id);
     }
 
-    // Añade .select() para forzar retorno y poder ver error completo si ocurre
+    // Solo actualiza la tabla projects si hay algo que enviar
     const { error } = await supabase
       .from('projects')
       .update(patch)
       .eq('id', id)
-      .select();  // <= útil para depurar
+      .select();
 
     if (error) {
-      // imprime TODO lo que devuelve PostgREST
       console.error('updateProject error:', {
         message: error.message,
         details: (error as any).details,
@@ -275,20 +324,33 @@ export const projectsService = {
       throw error;
     }
 
-    if (project.gallery) {
-      await this.saveProjectMedia(id, project.gallery);
+    if (hasGallery) {
+        await this.saveProjectMedia(id, project.gallery!);
 
-      const stillExists = project.cover_image_url
-        ? project.gallery.some(g => g.url === project.cover_image_url)
-        : true;
+        // After await this.saveProjectMedia(id, project.gallery!)
+        const gallery = project.gallery || [];
 
-      if (!stillExists) {
-        await supabase
-          .from('projects')
-          .update({ cover_image: project.gallery[0]?.url ?? null })
-          .eq('id', id);
+        let needFallback = false;
+        if (project.cover_image_url) {
+          const exists = gallery.some(g => g.url === project.cover_image_url);
+          needFallback = !exists;
+        } else {
+          needFallback = gallery.length > 0; // no cover set, but gallery exists
+        }
+
+        if (needFallback && gallery.length > 0) {
+          const first = gallery[0] as any;
+          const coverUrl = first.path
+            ? supabase.storage.from('project-media').getPublicUrl(first.path).data.publicUrl
+            : first.url || null;
+
+          await supabase
+            .from('projects')
+            .update({ cover_image: coverUrl })
+            .eq('id', id);
+        }
       }
-    }
+
 
     return this.getProject(id);
   },
@@ -313,77 +375,106 @@ export const projectsService = {
     }
   },
 
-  async uploadMedia(file: File): Promise<{ url: string, path: string, mime: string }> {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const filePath = `${fileName}`;
+  async uploadMedia(file: File): Promise<{ url: string; path: string; mime: string; size: number }> {
+    if (file.size > MAX_BYTES) {
+        throw new Error(`El archivo supera el límite permitido (${(MAX_BYTES/1024/1024)|0} MB).`);
+    }
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'bin';
+    const guessMime =
+      file.type ||
+      (ext === 'mp4'  ? 'video/mp4' :
+      ext === 'mov'  ? 'video/quicktime' :
+      ext === 'webm' ? 'video/webm' :
+      ext === 'mkv'  ? 'video/x-matroska' :
+      ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' :
+      ext === 'png'  ? 'image/png'  :
+      'application/octet-stream');
+
+    const fileName = `${Date.now()}-${(crypto as any).randomUUID?.() || Math.random().toString(36).slice(2)}.${ext}`;
+    const filePath = fileName;
 
     const { error: uploadError } = await supabase.storage
       .from('project-media')
-      .upload(filePath, file);
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true,
+        contentType: guessMime,
+      });
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error('Storage upload error:', uploadError);
+      throw uploadError;
+    }
 
     const { data } = supabase.storage.from('project-media').getPublicUrl(filePath);
-
-    return { url: data.publicUrl, path: filePath, mime: file.type };
+    return { url: data.publicUrl, path: filePath, mime: guessMime, size: file.size };
   },
 
-
   async saveProjectMedia(projectId: string, gallery: AdminProject['gallery']): Promise<void> {
-    // 1) Read existing for THIS project
     const { data: existing, error: exErr } = await supabase
       .from('project_media')
-      .select('id, project_id, url');
-      // .eq('project_id', projectId);  // <= keep this filter!
+      .select('id, project_id, path, url')
+      .eq('project_id', projectId); // enable this if your RLS allows
     if (exErr) throw exErr;
 
-    const current = (existing ?? []).filter(r => r.project_id === projectId); // safety if RLS returns more
+    const current = (existing ?? []).filter(r => r.project_id === projectId);
+
+    // Build desired rows using path as primary pointer
     const desired = (gallery ?? []).map((g, idx) => ({
       project_id: projectId,
-      url: g.url,
-      type: g.type,              // must match your DB’s accepted values
+      bucket: 'project-media',
+      path: (g as any).path || null, // ✅ prefer path
+      url: g.url || null,            // keep for legacy display if needed
+      type: g.type,
       alt_text: g.alt_text || '',
       order_index: idx,
+      mime: (g as any).mime || null,
+      size_bytes: (g as any).size || null,
     }));
 
-    const currentUrls = new Set(current.map(e => e.url));
-    const desiredUrls = new Set(desired.map(d => d.url));
+    // Compare by path first; if path missing, compare by url (legacy)
+    const key = (r: any) => r.path || r.url;
+    const currentKeys = new Set(current.map(key));
+    const desiredKeys = new Set(desired.map(key));
 
-    // 2) Delete rows no longer present
-    const toDelete = current.filter(r => !desiredUrls.has(r.url));
+    // Delete removed
+    const toDelete = current.filter(r => !desiredKeys.has(key(r)));
     if (toDelete.length) {
       const { error: delErr } = await supabase
-        .from('project_media')
-        .delete()
-        .in('id', toDelete.map(r => r.id));
+        .from('project_media').delete().in('id', toDelete.map(r => r.id));
       if (delErr) throw delErr;
     }
 
-    // 3) Update rows that still exist (by composite key)
-    const toUpdate = desired.filter(d => currentUrls.has(d.url));
+    // Update existing
+    const toUpdate = desired.filter(d => currentKeys.has(key(d)));
     for (const r of toUpdate) {
-      const { error: updErr } = await supabase
-        .from('project_media')
-        .update({
-          type: r.type,
-          alt_text: r.alt_text,
-          order_index: r.order_index,
-        })
-        .eq('project_id', r.project_id)
-        .eq('url', r.url);
+      const q = supabase.from('project_media').update({
+        type: r.type,
+        alt_text: r.alt_text,
+        order_index: r.order_index,
+        bucket: r.bucket,
+        path: r.path,
+        mime: r.mime,
+        size_bytes: r.size_bytes,
+        url: r.url, // keep syncing while migrating
+      })
+      .eq('project_id', r.project_id);
+
+      // where clause by path or url
+      r.path ? q.eq('path', r.path) : q.is('path', null).eq('url', r.url!);
+
+      const { error: updErr } = await q;
       if (updErr) throw updErr;
     }
 
-    // 4) Insert new rows
-    const toInsert = desired.filter(d => !currentUrls.has(d.url));
+    // Insert new
+    const toInsert = desired.filter(d => !currentKeys.has(key(d)));
     if (toInsert.length) {
-      const { error: insErr } = await supabase
-        .from('project_media')
-        .insert(toInsert);
+      const { error: insErr } = await supabase.from('project_media').insert(toInsert);
       if (insErr) throw insErr;
     }
   }
+
 
 };
 

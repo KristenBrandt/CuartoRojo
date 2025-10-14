@@ -130,10 +130,15 @@ export interface ProjectMedia {
   id: string;
   project_id: string;
   type: 'image' | 'video';
-  url: string;
+  url: string;          // derived (computed from path) or legacy
   alt_text: string;
   order_index: number;
+  bucket?: string | null;   // 'project-media'
+  path?: string | null;     // e.g. '1739557021-abc123.mp4'
+  mime?: string | null;
+  size?: number | null;     // bytes
 }
+
 
 export interface AuthUser {
   id: string;

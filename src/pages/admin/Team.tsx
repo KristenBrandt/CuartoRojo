@@ -160,7 +160,7 @@ export default function Team() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {selectedMember ? 'Edit Team Member' : 'Add Team Member'}
+              {selectedMember ? 'Editar Miembro del Equipo' : 'Agregar Miembro del Equipo'}
             </DialogTitle>
           </DialogHeader>
           <TeamMemberForm
@@ -176,7 +176,7 @@ export default function Team() {
           <AlertDialogHeader>
             <AlertDialogTitle>Eliminar miembro del equipo</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this team member? This action cannot be undone.
+              ¿Estás seguro de que quieres eliminar a este miembro del equipo? Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

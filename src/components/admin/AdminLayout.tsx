@@ -30,7 +30,7 @@ const navigation = [
   { name: 'Panel Administrativo', href: '/admin', icon: LayoutDashboard },
   { name: 'Proyectos', href: '/admin/proyectos', icon: FolderOpen },
   { name: 'Categorías', href: '/admin/categorias', icon: Tags },
-  { name: 'Equipo', href: '/admin/equipo', icon: UsersRound },
+  //{ name: 'Equipo', href: '/admin/equipo', icon: UsersRound },
   { name: 'Usuarios', href: '/admin/usuarios', icon: Users },
   { name: 'Ajustes', href: '/admin/ajustes', icon: Settings },
 

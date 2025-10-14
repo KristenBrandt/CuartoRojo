@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,8 @@ export default function ProjectForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [project, setProject] = useState<Partial<AdminProject>>({
     title: '',
@@ -60,6 +62,7 @@ export default function ProjectForm() {
 
   const [cats, setCats] = useState<Category[]>([]);
   const [catsLoading, setCatsLoading] = useState(true);
+  const openFilePicker = () => fileInputRef.current?.click();
 
   useEffect(() => {
     if (isEdit && id) loadProject(id);
@@ -207,14 +210,19 @@ export default function ProjectForm() {
             id: (Date.now() + i).toString(),
             project_id: prev.id || '',
             url: m.url,
-            type: files[i].type.startsWith('video/') ? 'video' as const : 'image' as const,
+            // NEW:
+            path: m.path,
+            mime: m.mime,
+            size: m.size,
+            type: files[i].type.startsWith('video/') ? 'video' : 'image',
             alt_text: '',
             order_index: (prev.gallery?.length || 0) + i
           })),
         ],
       }));
       toast({ title: 'Archivos subidos', description: `${uploaded.length} archivo(s) subido(s) correctamente` });
-    } catch {
+    } catch (err) {
+      console.error('handleMediaUpload failed:', err);
       toast({ title: 'Error', description: 'No se pudieron subir los archivos', variant: 'destructive' });
     }
   };
@@ -245,6 +253,32 @@ export default function ProjectForm() {
       return { ...prev, gallery: g.map((it, i) => ({ ...it, order_index: i })) };
     });
   };
+
+
+ const handleDrop: React.DragEventHandler<HTMLDivElement> = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const dt = e.dataTransfer;
+    const files = dt?.files;
+    if (files && files.length) {
+      handleMediaUpload(files); // your existing function
+    }
+  };
+
+  const handleDragOver: React.DragEventHandler<HTMLDivElement> = (e) => {
+    e.preventDefault(); // REQUIRED so onDrop fires
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave: React.DragEventHandler<HTMLDivElement> = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
 
   return (
     <AdminLayout>
@@ -413,28 +447,38 @@ export default function ProjectForm() {
                 <CardDescription>Imágenes y videos del proyecto (elige una portada)</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="border-dashed border-2 border-muted-foreground/25 rounded-lg p-8 text-center">
-                  <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">
-                      Arrastra archivos aquí o haz clic para seleccionar
-                    </p>
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*,video/*"
-                      onChange={(e) => handleMediaUpload(e.target.files)}
-                      className="hidden"
-                      id="media-upload"
-                    />
-                    {/* clickable now */}
-                    <label htmlFor="media-upload" className="cursor-pointer inline-block">
-                      <Button variant="outline" size="sm">
-                        Seleccionar Archivos
-                      </Button>
-                    </label>
-                  </div>
-                </div>
+                    <div
+                      className={`border-dashed border-2 rounded-lg p-8 text-center transition-colors
+                        ${isDragging ? 'border-primary/60 bg-primary/5' : 'border-muted-foreground/25'}`}
+                      onDrop={handleDrop}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && openFilePicker()}
+                    >
+                      <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">
+                          {isDragging ? 'Suelta los archivos para subirlos' : 'Arrastra archivos aquí o haz clic para seleccionar'}
+                        </p>
+
+                        {/* Hidden input controlled via ref */}
+                        <input
+                          ref={fileInputRef}
+                          id="media-upload"
+                          type="file"
+                          multiple
+                          accept="image/*,video/*"
+                          className="hidden"
+                          onChange={(e) => e.target.files && handleMediaUpload(e.target.files)}
+                        />
+
+                        <Button variant="outline" size="sm" type="button" onClick={openFilePicker}>
+                          Seleccionar Archivos
+                        </Button>
+                      </div>
+                    </div>
 
                 {!!project.gallery?.length && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -452,7 +496,10 @@ export default function ProjectForm() {
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
-                                  <Video className="h-12 w-12 text-muted-foreground" />
+                                  <video
+                                    src={item.url} 
+                                    controls 
+                                    className="w-full h-full object-cover" />
                                 </div>
                               )}
                             </div>

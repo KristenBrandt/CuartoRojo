@@ -1,18 +1,63 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Play, Star, Award, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import Layout from '@/components/Layout';
 import heroImage from '@/assets/hero-bg.jpg';
 import weddingImage from '@/assets/wedding-hero.jpg';
 import corporateImage from '@/assets/corporate-hero.jpg';
 import foodImage from '@/assets/food-hero.jpg';
-import projects from '@/data/projects.json';
+// import projects from '@/data/projects.json';
 import testimonials from '@/data/testimonials.json';
+import { projectsService } from '@/services/api';
+
+type PublicProject = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  location: string;
+  date: string;       // ISO
+  category: string;   // already mapped to name in service
+};
+
+
 
 const Index = () => {
-  const featuredProjects = projects.filter(project => project.featured);
+  const [reelOpen, setReelOpen] = useState(false);
+  const reelUrl = 'https://www.youtube.com/embed/dQw4w9WgXcQ'; // replace with your real reel
+
+  const [featuredProjects, setFeaturedProjects] = useState<PublicProject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
+
+  const coverFor = (p: any, index: number) =>
+  p.cover_image_url ||
+  p.gallery?.find((m: any) => m.type === 'image' && m.url)?.url ||
+  p.gallery?.[0]?.url ||
+  (index % 3 === 0 ? weddingImage : index % 3 === 1 ? corporateImage : foodImage);
+
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        const data = await projectsService.getFeaturedPublished(9);
+        if (!mounted) return;
+        setFeaturedProjects(data);
+      } catch (e: any) {
+        if (!mounted) return;
+        setErr(e?.message || 'Error al cargar proyectos');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   return (
     <Layout>
@@ -31,8 +76,8 @@ const Index = () => {
             transition={{ duration: 0.8 }}
             className="text-5xl md:text-7xl font-serif mb-6"
           >
-            Eventos Cinematográficos.
-            <span className="text-primary"> Historias Inolvidables.</span>
+            Transformamos ideas en
+            <span className="text-primary"> experiencias memorables.</span>
           </motion.h1>
           
           <motion.p 
@@ -58,7 +103,12 @@ const Index = () => {
               </Link>
             </Button>
             
-            <Button size="lg" variant="outline" className="border-white text-black hover:bg-white hover:text-black">
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-white text-black hover:bg-white hover:text-black"
+              onClick={() => setReelOpen(true)}
+            >
               <Play className="mr-2" size={18} />
               Ver Reel
             </Button>
@@ -136,45 +186,59 @@ const Index = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProjects.map((project, index) => (
-              <motion.div
-                key={project.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
-                <Link to={`/portfolio/${project.slug}`}>
-                  <Card className="group overflow-hidden hover:shadow-cinematic transition-all duration-300">
-                    <div className="relative overflow-hidden">
-                      <img 
-                        src={project.id === "1" ? weddingImage : project.id === "2" ? corporateImage : foodImage}
-                        alt={project.title}
-                        className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <div className="absolute top-4 left-4">
-                        <span className="bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">
-                          {project.category.replace('-', ' ')}
-                        </span>
+          {err && (
+            <p className="text-center text-sm text-red-500 mb-8">
+              No se pudieron cargar los proyectos: {err}
+            </p>
+          )}
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="animate-pulse h-96 bg-muted rounded-xl" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredProjects.map((project, index) => (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                >
+                  <Link to={`/portfolio/${project.slug}`}>
+                    <Card className="group overflow-hidden hover:shadow-cinematic transition-all duration-300">
+                      <div className="relative overflow-hidden">
+                        <img 
+                          src={coverFor(project,index)}
+                          alt={project.title}
+                          className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="absolute top-4 left-4">
+                          <span className="bg-primary text-white px-3 py-1 rounded-full text-sm font-medium">
+                            {String(project.category || '').replace('-', ' ')}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <CardContent className="p-6">
-                      <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
-                        {project.title}
-                      </h3>
-                      <p className="text-muted-foreground mb-4">{project.description}</p>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <span>{project.location}</span>
-                        <span className="mx-2">•</span>
-                        <span>{new Date(project.date).getFullYear()}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+                      <CardContent className="p-6">
+                        <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
+                          {project.title}
+                        </h3>
+                        <p className="text-muted-foreground mb-4">{project.description}</p>
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <span>{project.location}</span>
+                          <span className="mx-2">•</span>
+                          <span>{new Date(project.date).getFullYear()}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          )}
 
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -191,62 +255,6 @@ const Index = () => {
           </motion.div>
         </div>
       </section>
-
-      {/* Testimonials 
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl font-serif mb-4">Client Stories</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Hear from our satisfied clients about their experience working with us
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {testimonials.slice(0, 3).map((testimonial, index) => (
-              <motion.div
-                key={testimonial.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
-                <Card className="h-full">
-                  <CardContent className="p-6">
-                    <div className="flex items-center mb-4">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="text-primary fill-current" size={16} />
-                      ))}
-                    </div>
-                    <p className="text-muted-foreground mb-6 italic">
-                      "{testimonial.content}"
-                    </p>
-                    <div className="flex items-center">
-                      <div className="w-12 h-12 bg-gradient-hero rounded-full flex items-center justify-center mr-4">
-                        <span className="text-white font-semibold">
-                          {testimonial.name.split(' ').map(n => n[0]).join('')}
-                        </span>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold">{testimonial.name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {testimonial.role}, {testimonial.company}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      */}
 
       {/* Call to Action */}
       <section className="py-20 bg-gradient-hero text-white">
@@ -270,6 +278,26 @@ const Index = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Reel Modal */}
+      <Dialog open={reelOpen} onOpenChange={setReelOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Reel</DialogTitle>
+            <DialogDescription>Disfruta una muestra de nuestro trabajo.</DialogDescription>
+          </DialogHeader>
+          <div className="relative w-full aspect-video rounded-md overflow-hidden">
+            <iframe
+              className="absolute inset-0 w-full h-full"
+              src={reelUrl}
+              title="Cuarto Rojo Reel"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };

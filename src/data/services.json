@@ -1,102 +1,98 @@
 [
   {
-    "id": "logistics",
-    "title": "Event Logistics",
-    "slug": "event-logistics",
-    "description": "Comprehensive event planning and coordination, ensuring every detail is executed flawlessly from concept to completion.",
+    "id": "marketing",
+    "title": "Marketing",
+    "slug": "marketing",
+    "description": "Estrategia y campañas para conectar con tu audiencia y cumplir objetivos de negocio.",
     "deliverables": [
-      "Venue scouting and management",
-      "Vendor coordination and oversight",
-      "Timeline development and execution",
-      "Day-of event coordination",
-      "Equipment and technology setup",
-      "Guest experience management"
+      "Estrategia digital",
+      "Gestión de redes sociales",
+      "Creación de campañas publicitarias"
     ],
-    "gallery": [
-      {
-        "type": "image",
-        "url": "/services/logistics-1.jpg",
-        "alt": "Event setup and coordination"
-      },
-      {
-        "type": "image",
-        "url": "/services/logistics-2.jpg",
-        "alt": "Behind the scenes coordination"
-      }
-    ],
+    "gallery": [],
     "icon": "Calendar",
     "featured": true,
     "seo": {
-      "title": "Event Logistics & Planning Services | Cuarto Rojo",
-      "description": "Professional event logistics and coordination services. We handle every detail so you can focus on what matters most.",
-      "keywords": ["event logistics", "event planning", "event coordination", "Mexico events"]
+      "title": "Marketing | 4TO ROJO",
+      "description": "Estrategia digital, gestión de redes y campañas publicitarias.",
+      "keywords": ["marketing", "estrategia digital", "redes sociales", "campañas publicitarias"]
     }
   },
   {
-    "id": "coverage",
-    "title": "Audiovisual Coverage", 
-    "slug": "audiovisual-coverage",
-    "description": "Professional photography and videography services capturing the essence and emotion of your special moments.",
+    "id": "fotografia",
+    "title": "Fotografía",
+    "slug": "fotografia",
+    "description": "Coberturas y producciones fotográficas con enfoque publicitario y corporativo.",
     "deliverables": [
-      "Multi-camera video production",
-      "Professional photography",
-      "Live streaming capabilities",
-      "Drone footage (when permitted)",
-      "Real-time social media content",
-      "Same-day highlight delivery"
+      "Fotografía publicitaria",
+      "Fotografía de producto",
+      "Fotografía de eventos",
+      "Fotografía corporativa y de retrato"
     ],
-    "gallery": [
-      {
-        "type": "image",
-        "url": "/services/coverage-1.jpg",
-        "alt": "Professional camera equipment in action"
-      },
-      {
-        "type": "video",
-        "url": "/services/coverage-reel.mp4",
-        "poster": "/services/coverage-reel-poster.jpg",
-        "alt": "Audiovisual coverage showreel"
-      }
-    ],
+    "gallery": [],
     "icon": "Camera",
     "featured": true,
     "seo": {
-      "title": "Professional Audiovisual Coverage | Cuarto Rojo",
-      "description": "Expert photography and videography services for events. Capture every moment with cinematic quality.",
-      "keywords": ["event videography", "event photography", "live streaming", "professional coverage"]
+      "title": "Fotografía | 4TO ROJO",
+      "description": "Publicitaria, producto, eventos y corporativa/retrato.",
+      "keywords": ["fotografía de producto", "fotografía de eventos", "retrato corporativo"]
     }
   },
   {
-    "id": "post-production",
-    "title": "Post-Production",
-    "slug": "post-production", 
-    "description": "Expert editing and post-production services transforming raw footage into compelling visual stories.",
+    "id": "produccion-audiovisual",
+    "title": "Producción Audiovisual",
+    "slug": "produccion-audiovisual",
+    "description": "Piezas audiovisuales con calidad cinematográfica para marcas y organizaciones.",
     "deliverables": [
-      "Professional video editing",
-      "Color grading and correction",
-      "Audio mixing and mastering",
-      "Motion graphics and titles",
-      "Social media optimization",
-      "Multiple format delivery"
+      "Spots publicitarios",
+      "Videos corporativos",
+      "Documentales y cortometrajes"
     ],
-    "gallery": [
-      {
-        "type": "image",
-        "url": "/services/post-1.jpg",
-        "alt": "Video editing workspace"
-      },
-      {
-        "type": "image",
-        "url": "/services/post-2.jpg",
-        "alt": "Color grading session"
-      }
-    ],
+    "gallery": [],
     "icon": "Film",
     "featured": true,
     "seo": {
-      "title": "Video Post-Production & Editing Services | Cuarto Rojo",
-      "description": "Professional video editing and post-production services. Transform your footage into compelling visual stories.",
-      "keywords": ["video editing", "post production", "color grading", "video production"]
+      "title": "Producción Audiovisual | 4TO ROJO",
+      "description": "Spots, videos corporativos, documentales y cortometrajes.",
+      "keywords": ["producción audiovisual", "video corporativo", "spot publicitario", "documental"]
+    }
+  },
+  {
+    "id": "creatividad-diseno",
+    "title": "Creatividad & Diseño",
+    "slug": "creatividad-diseno",
+    "description": "Construimos identidades y piezas visuales que comunican con claridad.",
+    "deliverables": [
+      "Branding e identidad visual",
+      "Diseño gráfico",
+      "Contenido visual para redes"
+    ],
+    "gallery": [],
+    "icon": "Film",
+    "featured": false,
+    "seo": {
+      "title": "Creatividad y Diseño | 4TO ROJO",
+      "description": "Branding, identidad, diseño gráfico y contenido para redes.",
+      "keywords": ["branding", "identidad visual", "diseño gráfico", "contenido para redes"]
+    }
+  },
+  {
+    "id": "montaje-eventos",
+    "title": "Montaje de Eventos Corporativos y Sociales",
+    "slug": "montaje-eventos",
+    "description": "Coordinación técnica y logística para que tu evento suceda sin fricciones.",
+    "deliverables": [
+      "Producción y montaje de eventos empresariales",
+      "Coordinación técnica y logística",
+      "Cobertura fotográfica y audiovisual del evento"
+    ],
+    "gallery": [],
+    "icon": "Calendar",
+    "featured": true,
+    "seo": {
+      "title": "Montaje de Eventos | 4TO ROJO",
+      "description": "Producción y montaje, coordinación técnica y cobertura del evento.",
+      "keywords": ["montaje de eventos", "coordinación logística", "eventos corporativos"]
     }
   }
 ]

@@ -7,18 +7,14 @@ import { Calendar, Camera, Film, ArrowRight } from 'lucide-react';
 import services from '@/data/services.json';
 
 const Services = () => {
-  const serviceIcons = {
-    Calendar,
-    Camera, 
-    Film
-  };
+  const serviceIcons = { Calendar, Camera, Film };
 
   return (
     <Layout>
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-gradient-hero text-white">
         <div className="container mx-auto px-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -28,8 +24,9 @@ const Services = () => {
               Nuestros Servicios
             </h1>
             <p className="text-xl md:text-2xl opacity-90">
-              Servicios integrales de producción de eventos que transforman tu visión en una realidad cinematográfica
-               mediante logística experta, cobertura profesional y postproducción de alto nivel.
+              Marketing, Fotografía, Producción Audiovisual, Creatividad & Diseño y
+              Montaje de Eventos Corporativos y Sociales. Integramos estrategia y
+              producción para que tus proyectos trasciendan.
             </p>
           </motion.div>
         </div>
@@ -38,7 +35,7 @@ const Services = () => {
       {/* Services Overview */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -46,14 +43,14 @@ const Services = () => {
           >
             <h2 className="text-4xl font-serif mb-4">Lo que hacemos</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Desde la planificación inicial hasta la entrega final, nos encargamos de cada aspecto de la producción de tu evento.
+              Desde la estrategia y la creatividad hasta la cobertura y el montaje,
+              nos encargamos de cada fase con estándares de calidad profesional.
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {services.map((service, index) => {
               const IconComponent = serviceIcons[service.icon as keyof typeof serviceIcons];
-              
               return (
                 <motion.div
                   key={service.id}
@@ -67,16 +64,16 @@ const Services = () => {
                       <div className="w-16 h-16 bg-gradient-hero rounded-xl flex items-center justify-center mb-6">
                         {IconComponent && <IconComponent className="text-white" size={32} />}
                       </div>
-                      
+
                       <h3 className="text-2xl font-serif mb-4 group-hover:text-primary transition-colors">
                         {service.title}
                       </h3>
-                      
+
                       <p className="text-muted-foreground mb-6">
                         {service.description}
                       </p>
 
-                      <h4 className="font-semibold mb-4">What's Included:</h4>
+                      <h4 className="font-semibold mb-4">Incluye:</h4>
                       <ul className="space-y-2 mb-8">
                         {service.deliverables.map((deliverable, idx) => (
                           <li key={idx} className="flex items-start">
@@ -86,7 +83,6 @@ const Services = () => {
                         ))}
                       </ul>
 
-                      {/* Mini Gallery */}
                       {service.gallery && service.gallery.length > 0 && (
                         <div className="grid grid-cols-2 gap-2 mb-6">
                           {service.gallery.slice(0, 2).map((media, idx) => (
@@ -114,26 +110,18 @@ const Services = () => {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-4xl font-serif mb-6">Nuestro Enfoque Integral</h2>
+              <h2 className="text-4xl font-serif mb-6">Enfoque 360°</h2>
               <p className="text-lg text-muted-foreground mb-8">
-                No solo ofrecemos servicios individuales: creamos soluciones completas que integran de forma fluida la logística,
-                 la producción y la postproducción para lograr el máximo impacto y eficiencia.
+                Planificación, producción y entrega con un solo equipo. Coordinamos
+                logística, cobertura y piezas finales para que el resultado sea
+                consistente y puntual.
               </p>
-              
+
               <div className="space-y-6">
                 {[
-                  {
-                    title: "Planificación Previa al Evento",
-                    description: "Coordinación detallada con todos los involucrados, gestión del lugar y preparación técnica."
-                  },
-                  {
-                    title: "Producción en Vivo", 
-                    description: "Captura en tiempo real con múltiples ángulos de cámara, audio profesional y opciones de transmisión en vivo."
-                  },
-                  {
-                    title: "Postproducción",
-                    description: "Edición experta, corrección de color y entrega en múltiples formatos optimizados para tus necesidades."
-                  }
+                  { title: "Preproducción", description: "Brief, objetivos, estrategia, guion/shotlist y plan logístico." },
+                  { title: "Producción", description: "Foto, video, audio e iluminación con operación profesional." },
+                  { title: "Postproducción", description: "Edición, color, audio y formatos listos para tus canales." }
                 ].map((item, index) => (
                   <motion.div
                     key={index}
@@ -160,29 +148,20 @@ const Services = () => {
               transition={{ duration: 0.6 }}
             >
               <Card className="p-8 bg-gradient-hero text-white">
-                <h3 className="text-2xl font-serif mb-6">¿Listo para Empezar?</h3>
+                <h3 className="text-2xl font-serif mb-6">¿Listos para crear algo grande?</h3>
                 <p className="mb-8 opacity-90">
-                  Hablemos de tu evento y creemos un paquete de producción personalizado que haga realidad tu visión.
+                  Conversemos y armemos un paquete a medida según tus metas y presupuesto.
                 </p>
-                
+
                 <div className="space-y-4 mb-8">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-white rounded-full mr-3" />
-                    <span>Consulta inicial gratuita</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-white rounded-full mr-3" />
-                    <span>Paquete a medida</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 bg-white rounded-full mr-3" />
-                    <span>Cronograma detallado del proyecto</span>
-                  </div>
+                  <div className="flex items-center"><div className="w-3 h-3 bg-white rounded-full mr-3" /><span>Diagnóstico y propuesta sin costo</span></div>
+                  <div className="flex items-center"><div className="w-3 h-3 bg-white rounded-full mr-3" /><span>Plan y cronograma claros</span></div>
+                  <div className="flex items-center"><div className="w-3 h-3 bg-white rounded-full mr-3" /><span>Entrega puntual</span></div>
                 </div>
 
                 <Button variant="secondary" size="lg" asChild className="w-full">
                   <Link to="/contact">
-                    Obtén tu Cotización
+                    Obtén tu cotización
                     <ArrowRight className="ml-2" size={18} />
                   </Link>
                 </Button>
@@ -195,7 +174,7 @@ const Services = () => {
       {/* Specialized Services */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -203,39 +182,22 @@ const Services = () => {
           >
             <h2 className="text-4xl font-serif mb-4">Experiencia Especializada</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Más allá de nuestros servicios principales, ofrecemos conocimientos especializados para necesidades únicas
+              Sumamos valor con servicios específicos según las necesidades del proyecto.
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              {
-                title: "Food Styling",
-                description: "Professional food presentation and styling for culinary events and product photography"
-              },
-              {
-                title: "Live Streaming",
-                description: "Multi-platform streaming with redundant systems for corporate events and conferences"
-              },
-              {
-                title: "Drone Coverage",
-                description: "Aerial cinematography for outdoor events and unique perspective shots"
-              },
-              {
-                title: "Social Media",
-                description: "Real-time content creation and optimization for social media platforms"
-              }
-            ].map((specialty, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
+              { title: "Food Styling", description: "Dirección y estilismo de alimentos para campañas y producto." },
+              { title: "Live Streaming", description: "Transmisión multi-plataforma con respaldo y monitoreo." },
+              { title: "Cobertura Aérea (Dron)", description: "Tomas aéreas según permisos y condiciones." },
+              { title: "Contenido Social", description: "Piezas en tiempo real optimizadas para redes." }
+            ].map((s, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: i * 0.1 }}>
                 <Card className="text-center h-full hover:shadow-elegant transition-shadow duration-300">
                   <CardContent className="p-6">
-                    <h3 className="font-semibold mb-3">{specialty.title}</h3>
-                    <p className="text-sm text-muted-foreground">{specialty.description}</p>
+                    <h3 className="font-semibold mb-3">{s.title}</h3>
+                    <p className="text-sm text-muted-foreground">{s.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>

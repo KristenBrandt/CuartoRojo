@@ -9,24 +9,23 @@ const About = () => {
     {
       step: "01",
       title: "Descubrimiento y Planificación",
-      description: "Nos sumergimos en tu visión, entendiendo cada detalle para diseñar la estrategia perfecta para tu evento."
+      description: "Aterrizamos tu idea y objetivos para trazar una estrategia clara desde el inicio."
     },
     {
       step: "02", 
-      title: "Logística y Coordinación",
-      description: "Nuestro equipo gestiona la coordinación con proveedores, el manejo de tiempos y la preparación técnica."
+      title: "Creatividad, Logística y Coordinación",
+      description: "Unimos creatividad con coordinación técnica y proveedores para que todo fluya sin fricciones."
     },
     {
       step: "03",
-      title: "Ejecución y Cobertura",
-      description: "Capturamos profesionalmente cada momento con una coordinación impecable el día del evento."
+      title: "Producción y Cobertura",
+      description: "Damos vida al proyecto: montaje, ejecución y captura profesional en el evento."
     },
     {
       step: "04",
       title: "Postproducción y Entrega",
-      description: "Edición experta y entrega rápida de tus materiales finales dentro de los plazos acordados."
+      description: "Edición, calidad final y entrega puntual, listos para generar impacto."
     }
-
   ];
 
   return (
@@ -41,11 +40,12 @@ const About = () => {
             className="max-w-4xl mx-auto text-center"
           >
             <h1 className="text-5xl md:text-6xl font-serif mb-6">
-              Acerca de Cuarto Rojo
+              Acerca de Nosotros
             </h1>
             <p className="text-xl md:text-2xl opacity-90">
-              Somos narradores apasionados, expertos técnicos y maestros de la logística, 
-              dedicados a transformar tus eventos en experiencias cinematográficas.
+              Transformamos ideas en experiencias memorables. Somos una agencia creativa que combina
+              marketing, fotografía, producción audiovisual y montaje de eventos para ofrecer soluciones
+              integrales que conectan, comunican y generan impacto.
             </p>
           </motion.div>
         </div>
@@ -62,22 +62,23 @@ const About = () => {
             >
               <h2 className="text-4xl font-serif mb-6">Nuestra Misión</h2>
               <p className="text-lg text-muted-foreground mb-6">
-                En Cuarto Rojo creemos que cada evento cuenta una historia que merece ser preservada.
-                Nuestra misión es capturar la esencia, la emoción y la energía de tus momentos especiales 
-                a través de producciones audiovisuales cuidadosamente elaboradas.
+                En 4TO ROJO hacemos realidad la visión de cada cliente, llevando su proyecto desde la idea
+                hasta la ejecución con calidad, estrategia y creatividad. Unimos disciplinas como marketing,
+                fotografía, producción audiovisual y montaje de eventos corporativos y sociales para entregar
+                resultados que trascienden.
               </p>
               <p className="text-lg text-muted-foreground mb-8">
-                Combinamos la visión artística con la excelencia técnica, asegurando que cada proyecto 
-                reciba la atención al detalle que merece. Desde reuniones íntimas hasta
-                producciones a gran escala, aportamos el mismo nivel de pasión y profesionalismo a cada uno de ellos.
+                Nuestra Visión: ser la agencia referente en Guatemala y la región por convertir ideas en
+                proyectos innovadores y experiencias únicas, inspirando a las marcas a trascender al unir
+                creatividad, tecnología y producción.
               </p>
               
               <div className="space-y-4">
                 {[
-                  "Estándares de producción con calidad cinematográfica",
-                  "Logística integral de eventos",
-                  "Postproducción rápida y eficiente",
-                  "Experiencia personalizada para cada cliente"
+                  "Soluciones integrales de principio a fin",
+                  "Creatividad con propósito y enfoque estratégico",
+                  "Ejecución profesional y calidad en cada detalle",
+                  "Acompañamiento cercano para transformar la visión en resultados"
                 ].map((item, index) => (
                   <motion.div
                     key={index}
@@ -101,18 +102,18 @@ const About = () => {
             >
               <div className="aspect-square bg-gradient-hero rounded-2xl p-8 text-white">
                 <div className="h-full flex flex-col justify-center">
-                  <h3 className="text-3xl font-serif mb-4">Creciendo con Cada Evento</h3>
+                  <h3 className="text-3xl font-serif mb-4">Inspirar, Producir, Trascender</h3>
                   <p className="text-lg opacity-90 mb-6">
-                    Construyendo una reputación de excelencia, un proyecto a la vez.
+                    Creamos campañas, contenidos y eventos que dejan huella en Guatemala y la región.
                   </p>
                   <div className="grid grid-cols-2 gap-4 text-center">
                     <div>
                       <div className="text-2xl font-bold">100%</div>
-                      <div className="text-sm opacity-80">Compromiso con el Cliente</div>
+                      <div className="text-sm opacity-80">Enfoque en resultados</div>
                     </div>
                     <div>
                       <div className="text-2xl font-bold">∞</div>
-                      <div className="text-sm opacity-80">Posibilidades Creativas</div>
+                      <div className="text-sm opacity-80">Creatividad y producción</div>
                     </div>
                   </div>
                 </div>
@@ -133,7 +134,7 @@ const About = () => {
           >
             <h2 className="text-4xl font-serif mb-4">Cómo Trabajamos</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Nuestro proceso comprobado de 4 pasos garantiza una ejecución impecable, desde el concepto hasta la entrega.
+              De la idea a la ejecución: un proceso claro para garantizar impacto y calidad en cada entrega.
             </p>
           </motion.div>
 
@@ -161,7 +162,7 @@ const About = () => {
       </section>
 
       {/* Team Section */}
-      <section className="py-20">
+     {/* <section className="py-20">
         <div className="container mx-auto px-4">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -203,6 +204,7 @@ const About = () => {
           </div>
         </div>
       </section>
+      */}
     </Layout>
   );
 };

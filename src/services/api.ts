@@ -543,6 +543,75 @@ export const projectsService = {
         date: project.date,
         description: project.description,
       }));
+    },
+
+  async getFeatured() {
+      const { data, error } = await supabase
+        .from('projects')
+        .select(`
+          *,
+          category:categories(id, name),
+          media:project_media(*)
+        `)
+        .eq('status', 'published')
+        .order('order_index', { ascending: false })
+        .order('order_index', { ascending: true, foreignTable: 'project_media' })
+
+
+      if (error) throw error;
+
+      return (data || []).map((project: any) => ({
+        id: project.id,
+        title: project.title,
+        slug: project.slug,
+
+        // display name + keep FK handy
+        category: project.category?.name || 'Sin categoría',
+        category_id: project.category?.id || project.category_id,
+
+        short_description: project.description || '',
+        full_description: project.content || '',
+        cover_image_url: project.cover_image || null,
+
+        gallery: (project.media || []).map((m: any) => {
+          const computed = m.path
+            ? supabase.storage
+                .from(m.bucket || 'project-media')
+                .getPublicUrl(m.path).data.publicUrl
+            : null;
+
+          return {
+            id: String(m.id),
+            project_id: m.project_id,
+            url: computed || m.url,
+            type: m.type,
+            alt_text: m.alt_text || '',
+            order_index: m.order_index ?? 0,
+
+            path: m.path,
+            bucket: m.bucket || 'project-media',
+            mime: m.mime,
+            size: m.size_bytes,
+          };
+        }),
+
+        seo_title: project.seo_title || '',
+        seo_description: project.seo_description || '',
+        status: project.status,
+        is_featured: project.featured,
+        order_index: project.order_index,
+        tags: project.tags || [],
+        client_name: project.client || '',
+        event_date: project.date,
+        location: project.location || '',
+        created_at: project.created_at,
+        updated_at: project.updated_at,
+        published_at: project.status === 'published' ? project.updated_at : null,
+
+        // convenience for public cards:
+        date: project.date,
+        description: project.description,
+      }));
     }
 
 };

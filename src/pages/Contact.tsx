@@ -65,6 +65,7 @@ const Contact = () => {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
             >
+              {/* 
               <Card>
                 <CardContent className="p-8">
                   <h2 className="text-3xl font-serif mb-6">Obtén tu Cotización</h2>
@@ -184,6 +185,7 @@ const Contact = () => {
                   </form>
                 </CardContent>
               </Card>
+              */}
             </motion.div>
 
             {/* Contact Information */}
@@ -203,8 +205,8 @@ const Contact = () => {
                       <Phone className="text-primary mr-4 mt-1" size={20} />
                       <div>
                         <h4 className="font-semibold mb-1">Teléfono</h4>
-                        <p className="text-muted-foreground">+502 1234 5678</p>
-                        <p className="text-sm text-muted-foreground">Mon-Fri, 7am-7pm</p>
+                        <p className="text-muted-foreground">+502 5663 2686</p>
+                        <p className="text-sm text-muted-foreground">Lunes-Viernes, 7am-7pm</p>
                       </div>
                     </div>
 
@@ -212,7 +214,7 @@ const Contact = () => {
                       <Mail className="text-primary mr-4 mt-1" size={20} />
                       <div>
                         <h4 className="font-semibold mb-1">Correo Electrónico</h4>
-                        <p className="text-muted-foreground">info@cuartorojo.com</p>
+                        <p className="text-muted-foreground">ventas@4torojo.com</p>
                         <p className="text-sm text-muted-foreground">Respondemos en un plazo de 24 horas</p>
                       </div>
                     </div>
@@ -230,12 +232,12 @@ const Contact = () => {
                       <div>
                         <h4 className="font-semibold mb-1">WhatsApp</h4>
                         <a 
-                          href="https://wa.me/50212345678" 
+                          href="https://wa.me/50256632686" 
                           className="text-primary hover:underline"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          +502 1234 5678
+                          +502 5663 2686
                         </a>
                         <p className="text-sm text-muted-foreground">Respuestas Rápidas</p>
                       </div>
@@ -255,10 +257,11 @@ const Contact = () => {
                 
                 <div className="flex space-x-4">
                   <Button variant="outline" size="sm" asChild>
-                    <a href="https://instagram.com/cuartorojo" target="_blank" rel="noopener noreferrer">
+                    <a href="https://www.instagram.com/cuartorojogt?igsh=a2p5MHM3YnlicnVz" target="_blank" rel="noopener noreferrer">
                       Instagram
                     </a>
                   </Button>
+                  {/*
                   <Button variant="outline" size="sm" asChild>
                     <a href="https://facebook.com/cuartorojo" target="_blank" rel="noopener noreferrer">
                       Facebook
@@ -269,6 +272,7 @@ const Contact = () => {
                       Vimeo
                     </a>
                   </Button>
+                  */}
                 </div>
               </CardContent>
             </Card>
@@ -326,7 +330,7 @@ const Contact = () => {
             </p>
             <Button size="lg" asChild className="bg-green-600 hover:bg-green-700">
               <a 
-                href="https://wa.me/50212345678?text=¡Hola! Necesito asistencia urgente con un evento." 
+                href="https://wa.me/50256632686?text=¡Hola! Necesito asistencia urgente con un evento." 
                 target="_blank" 
                 rel="noopener noreferrer"
               >

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -9,9 +9,23 @@ import projects from '@/data/projects.json';
 import weddingImage from '@/assets/wedding-hero.jpg';
 import corporateImage from '@/assets/corporate-hero.jpg';
 import foodImage from '@/assets/food-hero.jpg';
+import { projectsService } from '@/services/api';
+
+type PublicProject = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  location: string;
+  date: string;       // ISO
+  category: string;   // already mapped to name in service
+};
 
 const Portfolio = () => {
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [featuredProjects, setFeatured] = useState<PublicProject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
   
   const categories = [
     { id: 'all', label: 'Todos los proyectos' },
@@ -34,6 +48,25 @@ const Portfolio = () => {
       default: return weddingImage;
     }
   };
+
+    useEffect(() => {
+      let mounted = true;
+      (async () => {
+        try {
+          setLoading(true);
+          const data = await projectsService.getFeatured();
+          if (!mounted) return;
+          setFeatured(data);
+        } catch (e: any) {
+          if (!mounted) return;
+          setErr(e?.message || 'Error al cargar proyectos');
+        } finally {
+          if (mounted) setLoading(false);
+        }
+      })();
+      return () => { mounted = false; };
+    }, []);
+  
 
   return (
     <Layout>

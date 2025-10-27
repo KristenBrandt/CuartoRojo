@@ -90,7 +90,8 @@ const Index = () => {
             que dan vida a tu visión con excelencia cinematográfica.
           </motion.p>
           
-          <motion.div 
+         {/* 
+         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -112,7 +113,8 @@ const Index = () => {
               <Play className="mr-2" size={18} />
               Ver Reel
             </Button>
-          </motion.div>
+          </motion.div> 
+          */ }
         </div>
       </section>
 
@@ -171,7 +173,9 @@ const Index = () => {
         </div>
       </section>
 
+    
       {/* Featured Projects */}
+         {/* 
       <section className="py-20">
         <div className="container mx-auto px-4">
           <motion.div 
@@ -255,6 +259,9 @@ const Index = () => {
           </motion.div>
         </div>
       </section>
+      */}
+
+
 
       {/* Call to Action */}
       <section className="py-20 bg-gradient-hero text-white">

@@ -28,7 +28,7 @@ const Navigation = () => {
     { href: '/about', label: 'Acerca de Nosotros' },
     { href: '/services', label: 'Servicios' },
     { href: '/contact', label: 'Contacto' },
-   {/* { href: '/portfolio', label: 'Portafolio' }, */}
+    { href: '/portfolio', label: 'Portafolio' }
     
   ];
 

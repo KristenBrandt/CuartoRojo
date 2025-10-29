@@ -175,7 +175,7 @@ const Index = () => {
 
     
       {/* Featured Projects */}
-         {/* 
+         
       <section className="py-20">
         <div className="container mx-auto px-4">
           <motion.div 
@@ -259,7 +259,7 @@ const Index = () => {
           </motion.div>
         </div>
       </section>
-      */}
+      
 
 
 

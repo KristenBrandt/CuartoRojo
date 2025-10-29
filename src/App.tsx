@@ -33,8 +33,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             {/* Public routes */}
-            <Route path="/" element={<Construction />} />
-            <Route path="/landing" element={<Index />} />
+            {/*<Route path="/" element={<Construction />} */}
+            <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
             <Route path="/portfolio" element={<Portfolio />} />

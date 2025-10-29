@@ -62,7 +62,7 @@ const UnderConstruction = () => {
             </a>
 
             <a
-              href="mailto:info@audiovisualcatering.com"
+              href="mailto:ventas@4torojo.com"
               className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors group"
             >
               <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">

@@ -612,7 +612,72 @@ export const projectsService = {
         date: project.date,
         description: project.description,
       }));
-    }
+    },
+
+  async getBySlugPublished(slug: string): Promise<AdminProject | null> {
+  const { data, error } = await supabase
+    .from('projects')
+    .select(`
+      *,
+      category:categories(id, name),
+      media:project_media(*)
+    `)
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .order('order_index', { ascending: true, foreignTable: 'project_media' })
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    title: data.title,
+    slug: data.slug,
+    category: data.category?.name || 'Sin categoría',
+    category_id: data.category?.id || data.category_id,
+    short_description: data.description || '',
+    full_description: data.content || '',
+    cover_image_url: data.cover_image || null,
+    gallery: (data.media || []).map((m: any) => {
+      const computed = m.path
+        ? supabase.storage
+            .from(m.bucket || 'project-media')
+            .getPublicUrl(m.path).data.publicUrl
+        : null;
+
+      return {
+        id: String(m.id),
+        project_id: m.project_id,
+        url: computed || m.url,
+        type: m.type, // 'image' | 'video'
+        alt_text: m.alt_text || '',
+        order_index: m.order_index ?? 0,
+        path: m.path,
+        bucket: m.bucket || 'project-media',
+        mime: m.mime,
+        size: m.size_bytes,
+      };
+    }),
+    seo_title: data.seo_title || '',
+    seo_description: data.seo_description || '',
+    status: data.status,
+    is_featured: data.featured,
+    order_index: data.order_index,
+    tags: data.tags || [],
+    client_name: data.client || '',
+    event_date: data.date,
+    location: data.location || '',
+    created_at: data.created_at,
+    updated_at: data.updated_at,
+    published_at: data.status === 'published' ? data.updated_at : null,
+
+    // Optional JSONB columns if you added them:
+    results: (data as any).results || [],
+    deliverables: (data as any).deliverables || [],
+    embed_reel: (data as any).embed_reel || null,
+  };
+}
 
 };
 
@@ -800,6 +865,8 @@ export const categoriesService = {
       updated_at: cat.updated_at
     }));
   },
+
+  
 
 
   async createCategory(category: CreateCategoryForm): Promise<Category> {

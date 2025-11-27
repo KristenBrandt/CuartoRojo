@@ -16,37 +16,21 @@
       "title": "Marketing | 4TO ROJO",
       "description": "Estrategia digital, gestión de redes y campañas publicitarias.",
       "keywords": ["marketing", "estrategia digital", "redes sociales", "campañas publicitarias"]
-    }
-  },
-  {
-    "id": "fotografia",
-    "title": "Fotografía",
-    "slug": "fotografia",
-    "description": "Coberturas y producciones fotográficas con enfoque publicitario y corporativo.",
-    "deliverables": [
-      "Fotografía publicitaria",
-      "Fotografía de producto",
-      "Fotografía de eventos",
-      "Fotografía corporativa y de retrato"
-    ],
-    "gallery": [],
-    "icon": "Camera",
-    "featured": true,
-    "seo": {
-      "title": "Fotografía | 4TO ROJO",
-      "description": "Publicitaria, producto, eventos y corporativa/retrato.",
-      "keywords": ["fotografía de producto", "fotografía de eventos", "retrato corporativo"]
-    }
+    },
+    "link":"https://www.canva.com/design/DAG5MOgtgTU/CwAefpChT20Un6JqhKLGbA/view?utm_content=DAG5MOgtgTU&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hbabd8291b2"
   },
   {
     "id": "produccion-audiovisual",
-    "title": "Producción Audiovisual",
+    "title": "Producción Audiovisual y Fotografía",
     "slug": "produccion-audiovisual",
-    "description": "Piezas audiovisuales con calidad cinematográfica para marcas y organizaciones.",
+    "description": "Piezas audiovisuales con calidad cinematográfica para marcas y producciones fotográficas con enfoque publicitario y corporativo.",
     "deliverables": [
       "Spots publicitarios",
       "Videos corporativos",
-      "Documentales y cortometrajes"
+      "Documentales y cortometrajes",
+      "Fotografía publicitaria",
+      "Fotografía de producto",
+      "Fotografía de eventos"
     ],
     "gallery": [],
     "icon": "Film",
@@ -54,7 +38,7 @@
     "seo": {
       "title": "Producción Audiovisual | 4TO ROJO",
       "description": "Spots, videos corporativos, documentales y cortometrajes.",
-      "keywords": ["producción audiovisual", "video corporativo", "spot publicitario", "documental"]
+      "keywords": ["producción audiovisual", "video corporativo", "spot publicitario", "documental","fotografía de producto", "fotografía de eventos", "retrato corporativo"]
     },
     "link": "https://www.canva.com/design/DAFvrsYnyrY/0JQoq-yeXO8MMBmlYdk_tA/view?utm_content=DAFvrsYnyrY&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h88e0d2a07b"
   },

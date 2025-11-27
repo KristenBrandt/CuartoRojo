@@ -110,7 +110,7 @@ const Index = () => {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
          {/* Background video */}
         <video
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover "
           autoPlay
           loop
           muted
@@ -172,8 +172,8 @@ const Index = () => {
       </section>
 
       {/* Marcas Carousel */}
-      <section className="py-10 bg-black ">
-        <div className="container mx-auto px-4">
+      <section className=" bg-white ">
+        <div className="container mx-auto px-1">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

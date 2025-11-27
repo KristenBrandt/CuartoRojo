@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, MessageSquare } from 'lucide-react';
 import Layout from '@/components/Layout';
@@ -9,10 +9,24 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { categoriesService } from '@/services/api';
+
+// Types for public grid
+type PublicCategory = {
+  id: string;
+  slug: string;
+  name: string;
+  is_active: boolean;
+};
+
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingCats, setLoadingCats] = useState(true);
+  const [categories, setCategories] = useState<PublicCategory[]>([]);
+  const [serviceType, setServiceType] = useState<string>('');
   const { toast } = useToast();
+  const [err, setErr] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -22,8 +36,8 @@ const Contact = () => {
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     toast({
-      title: "Message sent successfully!",
-      description: "We'll get back to you within 24 hours.",
+      title: "Mensaje enviado exitosamente!",
+      description: "Te contactaremos lo más pronto posible.",
     });
 
     setIsSubmitting(false);
@@ -31,7 +45,38 @@ const Contact = () => {
     // Reset form
     const form = e.target as HTMLFormElement;
     form.reset();
+    setServiceType('');
   };
+
+    // Load active categories
+    useEffect(() => {
+      let alive = true;
+      (async () => {
+        try {
+          setLoadingCats(true);
+          const cats = await categoriesService.getActive();
+          if (!alive) return;
+  
+          // ensure slugs are present (your service already returns slug)
+          setCategories(
+            (cats ?? []).map((c: any) => ({
+              id: c.id,
+              slug: c.slug,
+              name: c.name,
+              is_active: c.is_active,
+            }))
+          );
+        } catch (e: any) {
+          if (!alive) return;
+          setErr(e?.message ?? 'Error al cargar categorías');
+        } finally {
+          if (alive) setLoadingCats(false);
+        }
+      })();
+      return () => {
+        alive = false;
+      };
+    }, []);
 
   return (
     <Layout>
@@ -65,7 +110,7 @@ const Contact = () => {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
             >
-              {/* 
+          
               <Card>
                 <CardContent className="p-8">
                   <h2 className="text-3xl font-serif mb-6">Obtén tu Cotización</h2>
@@ -104,7 +149,7 @@ const Contact = () => {
                           id="phone" 
                           name="phone" 
                           type="tel" 
-                          placeholder="+52 55 1234 5678"
+                          placeholder="+502 1234 5678"
                         />
                       </div>
                       <div>
@@ -123,25 +168,51 @@ const Contact = () => {
                         <Input 
                           id="venue" 
                           name="venue" 
-                          placeholder="Ciudad de México"
+                          placeholder="Ciudad de Guatemala"
                         />
                       </div>
                       <div>
                         <Label htmlFor="serviceType">Tipo de Servicio *</Label>
-                        <Select name="serviceType" required>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona un servicio" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="full-package">Paquete Completo de Evento</SelectItem>
-                            <SelectItem value="logistics">Solo Logística de Evento</SelectItem>
-                            <SelectItem value="coverage">Solo Cobertura Audiovisual</SelectItem>
-                            <SelectItem value="post-production">Solo Postproducción</SelectItem>
-                            <SelectItem value="food-styling">Estilismo Gastronómico</SelectItem>
-                            <SelectItem value="other">Otro</SelectItem>
-                          </SelectContent>
-                        </Select>
 
+                        {loadingCats ? (
+                          <div className="text-sm text-muted-foreground mt-2">
+                            Cargando servicios...
+                          </div>
+                        ) : err ? (
+                          <div className="text-sm text-red-500 mt-2">
+                            {err || 'Error al cargar los servicios.'}
+                          </div>
+                        ) : (
+                          <>
+                            <Select
+                              value={serviceType}
+                              onValueChange={setServiceType}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecciona un servicio" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {categories.map((cat) => (
+                                  <SelectItem
+                                    key={cat.id}
+                                    value={cat.slug} // o cat.id si prefieres guardar el id
+                                  >
+                                    {cat.name}
+                                  </SelectItem>
+                                ))}
+                                <SelectItem value="other">Otro</SelectItem>
+                              </SelectContent>
+                            </Select>
+
+                            {/* 👇 Esto es lo que hace que se envíe en el FormData */}
+                            <input
+                              type="hidden"
+                              name="serviceType"
+                              value={serviceType || ''}
+                              required
+                            />
+                          </>
+                        )}
                       </div>
                     </div>
 
@@ -152,11 +223,11 @@ const Contact = () => {
                           <SelectValue placeholder="Selecciona un rango de presupuesto" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="under-50k">Menos de Q20,000 GTQ</SelectItem>
-                          <SelectItem value="50k-100k">$20,000 - $70,000 GTQ</SelectItem>
-                          <SelectItem value="100k-250k">$100,000 - $250,000 GTQ</SelectItem>
-                          <SelectItem value="250k-500k">$250,000 - $500,000 GTQ</SelectItem>
-                          <SelectItem value="over-500k">Más de $500,000 GTQ</SelectItem>
+                          <SelectItem value="under-50k">Menos de $500 </SelectItem>
+                          <SelectItem value="50k-100k">$500 - $1,000 </SelectItem>
+                          <SelectItem value="100k-250k">$1,000 - $3,000</SelectItem>
+                          <SelectItem value="250k-500k">$3,000 - $5,000 </SelectItem>
+                          <SelectItem value="over-500k">Más de $5,000 </SelectItem>
                           <SelectItem value="discuss">Prefiero hablarlo</SelectItem>
                         </SelectContent>
                       </Select>
@@ -185,7 +256,7 @@ const Contact = () => {
                   </form>
                 </CardContent>
               </Card>
-              */}
+       
             </motion.div>
 
             {/* Contact Information */}

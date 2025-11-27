@@ -45,6 +45,7 @@ const Services = () => {
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Desde la estrategia y la creatividad hasta la cobertura y el montaje,
               nos encargamos de cada fase con estándares de calidad profesional.
+              
             </p>
           </motion.div>
 
@@ -59,8 +60,10 @@ const Services = () => {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   id={service.id}
                 >
-                  <Card className="h-full group hover:shadow-cinematic transition-all duration-300">
-                    <CardContent className="p-8">
+                <Card className="h-full group hover:shadow-cinematic transition-all duration-300">
+                  <CardContent className="p-8 flex flex-col h-full">
+                    {/* CONTENIDO SUPERIOR */}
+                    <div className="flex-1 flex flex-col">
                       <div className="w-16 h-16 bg-gradient-hero rounded-xl flex items-center justify-center mb-6">
                         {IconComponent && <IconComponent className="text-white" size={32} />}
                       </div>
@@ -92,8 +95,28 @@ const Services = () => {
                           ))}
                         </div>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+
+                    {/* BOTÓN ALINEADO ABAJO */}
+                    {service.link && service.link.trim() !== "" && (
+                      <Button
+                        size="lg"
+                        asChild
+                        className="w-full mt-4"
+                      >
+                        <a
+                          href={service.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center"
+                        >
+                          Ver más
+                          <ArrowRight className="ml-2" size={18} />
+                        </a>
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
                 </motion.div>
               );
             })}

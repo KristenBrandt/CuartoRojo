@@ -215,7 +215,7 @@ const ProjectDetail = () => {
                           />
                         ) : (
                           <img
-                            className="w-full h-full object-cover aspect-video"
+                            className="w-full h-full object-contain"
                             src={media.url}
                             alt={media.alt_text || `Imagen ${index + 1}`}
                             loading="lazy"

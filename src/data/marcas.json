@@ -1,0 +1,50 @@
+[
+  {
+    "id": "ecoplanet",
+    "nombre": "EcoPlanet",
+    "descripcion": "Historias de amor capturadas con mirada cinematográfica y dirección artística impecable.",
+    "image": "/ecoplanet.png"
+  },
+  {
+    "id": "springfield",
+    "nombre": "Springfield",
+    "descripcion": "Producción audiovisual profesional que eleva la imagen y comunicación de tu marca.",
+    "image": "/springfield.png"
+  },
+  {
+    "id": "lilipink",
+    "nombre": "Lili Pink",
+    "descripcion": "Composiciones visuales que resaltan textura, color y esencia para marcas gastronómicas.",
+    "image": "/lilipink.png"
+  },
+  {
+    "id": "carbonstore",
+    "nombre": "Carbon Store",
+    "descripcion": "Cobertura dinámica y energética diseñada para capturar la emoción del público.",
+    "image": "/carbonstore.png"
+  },
+  {
+    "id": "aliansa",
+    "nombre": "aliansa",
+    "descripcion": "Cobertura dinámica y energética diseñada para capturar la emoción del público.",
+    "image": "/aliansa.png"
+  },
+  {
+    "id": "grupolarosa",
+    "nombre": "Grupo La Rosa",
+    "descripcion": "Cobertura dinámica y energética diseñada para capturar la emoción del público.",
+    "image": "/larosa.png"
+  },
+  {
+    "id": "ramirez",
+    "nombre": "ramirez",
+    "descripcion": "Cobertura dinámica y energética diseñada para capturar la emoción del público.",
+    "image": "/15.png"
+  },
+  {
+    "id": "pardo",
+    "nombre": "Pardo Pardo",
+    "descripcion": "Cobertura dinámica y energética diseñada para capturar la emoción del público.",
+    "image": "/pardopardo.png"
+  }
+]

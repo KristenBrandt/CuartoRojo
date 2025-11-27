@@ -9,8 +9,10 @@ import Layout from '@/components/Layout';
 import heroImage from '@/assets/hero-bg.jpg';
 import weddingImage from '@/assets/wedding-hero.jpg';
 import corporateImage from '@/assets/corporate-hero.jpg';
+import heroVideo from '@/assets/videos_inicio_web.mp4';
 import foodImage from '@/assets/food-hero.jpg';
 // import projects from '@/data/projects.json';
+import marcas from '@/data/marcas.json';
 import testimonials from '@/data/testimonials.json';
 import { projectsService } from '@/services/api';
 
@@ -33,6 +35,49 @@ const Index = () => {
   const [featuredProjects, setFeaturedProjects] = useState<PublicProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+
+    // 👇 Carousel de marcas
+  const [currentMarca, setCurrentMarca] = useState(0);
+
+  const [visiblePerPage, setVisiblePerPage] = useState(2);
+
+  useEffect(() => {
+    const updateVisiblePerPage = () => {
+      const width = window.innerWidth;
+
+      if (width < 640) {
+        // móviles
+        setVisiblePerPage(2);
+      } else if (width < 1024) {
+        // tablets
+        setVisiblePerPage(3);
+      } else {
+        // desktop
+        setVisiblePerPage(4);
+      }
+    };
+
+  updateVisiblePerPage(); // run on mount
+  window.addEventListener('resize', updateVisiblePerPage);
+
+  return () => window.removeEventListener('resize', updateVisiblePerPage);
+}, []);
+
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCurrentMarca((prev) => (prev + 1) % marcas.length);
+    }, 6000); // cambia cada 6s
+
+    return () => clearInterval(id);
+  }, []);
+
+
+  const visibleMarcas = Array.from(
+    { length: Math.min(visiblePerPage, marcas.length) },
+    (_, i) => marcas[(currentMarca + i) % marcas.length]
+  );
+
 
   const coverFor = (p: any, index: number) =>
   p.cover_image_url ||
@@ -63,10 +108,18 @@ const Index = () => {
     <Layout>
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${heroImage})` }}
-        />
+         {/* Background video */}
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+          // poster={heroImage} // opcional: muestra imagen mientras carga el video
+        >
+          <source src={heroVideo} type="video/mp4" />
+          Tu navegador no soporta video HTML5.
+        </video>
         <div className="absolute inset-0 bg-gradient-overlay" />
         
         <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
@@ -118,6 +171,42 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Marcas Carousel */}
+      <section className="py-10 bg-black ">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            {/*
+            <p className="text-lg uppercase tracking-[0.25em] text-gray-300 text-center mb-8">
+              Marcas que han confiado en nosotros
+            </p>
+            */}
+
+            <div className="flex items-center justify-center gap-6 md:gap-12 max-w-5xl mx-auto">
+              {visibleMarcas.map((marca) => (
+                <motion.div
+                  key={marca.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                  className="flex items-center justify-center flex-1"
+                >
+                  <img
+                    src={marca.image}
+                    alt={marca.nombre}
+                    className="h-[120px] md:h-[180px] lg:h-[220px] w-auto object-contain"
+                  />
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      
       {/* Value Propositions */}
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">

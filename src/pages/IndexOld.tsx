@@ -58,7 +58,7 @@ const UnderConstruction = () => {
               <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
                 <Phone className="h-5 w-5 text-primary" />
               </div>
-              <span>+506 5663 2686</span>
+              <span>+502 5663 2686</span>
             </a>
 
             <a

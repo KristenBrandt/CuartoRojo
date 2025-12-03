@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { categoriesService } from '@/services/api';
+import { categoriesService, contactService } from '@/services/api';
 
 // Types for public grid
 type PublicCategory = {
@@ -28,24 +28,52 @@ const Contact = () => {
   const { toast } = useToast();
   const [err, setErr] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErr(null);
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const form = e.currentTarget;
+      const formData = new FormData(form);
 
-    toast({
-      title: "Mensaje enviado exitosamente!",
-      description: "Te contactaremos lo más pronto posible.",
-    });
+      const payload = {
+        name: formData.get('name') as string,
+        email: formData.get('email') as string,
+        phone: (formData.get('phone') as string) || null,
+        event_date: (formData.get('eventDate') as string) || null,
+        venue: (formData.get('venue') as string) || null,
+        service_type: (formData.get('serviceType') as string) || '',
+        budget_range: (formData.get('budgetRange') as string) || null,
+        message: formData.get('message') as string,
+      };
 
-    setIsSubmitting(false);
-    
-    // Reset form
-    const form = e.target as HTMLFormElement;
-    form.reset();
-    setServiceType('');
+      // validación rápida por si algo raro
+      if (!payload.service_type) {
+        throw new Error('Por favor selecciona un tipo de servicio.');
+      }
+
+      await contactService.create(payload);
+
+      toast({
+        title: 'Mensaje enviado exitosamente!',
+        description: 'Te contactaremos lo más pronto posible.',
+      });
+
+      form.reset();
+      setServiceType('');
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        title: 'Error al enviar el mensaje',
+        description:
+          error?.message ??
+          'Ocurrió un error al enviar tu mensaje. Intenta de nuevo.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
     // Load active categories
@@ -223,12 +251,12 @@ const Contact = () => {
                           <SelectValue placeholder="Selecciona un rango de presupuesto" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="under-50k">Menos de $500 </SelectItem>
-                          <SelectItem value="50k-100k">$500 - $1,000 </SelectItem>
-                          <SelectItem value="100k-250k">$1,000 - $3,000</SelectItem>
-                          <SelectItem value="250k-500k">$3,000 - $5,000 </SelectItem>
-                          <SelectItem value="over-500k">Más de $5,000 </SelectItem>
-                          <SelectItem value="discuss">Prefiero hablarlo</SelectItem>
+                          <SelectItem value="Menos de $500">Menos de $500 </SelectItem>
+                          <SelectItem value="$500 - $1,000">$500 - $1,000 </SelectItem>
+                          <SelectItem value="$1,000 - $3,000">$1,000 - $3,000</SelectItem>
+                          <SelectItem value="$3,000 - $5,000">$3,000 - $5,000 </SelectItem>
+                          <SelectItem value="Más de $5,000">Más de $5,000 </SelectItem>
+                          <SelectItem value="Prefiero hablarlo">Prefiero hablarlo</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

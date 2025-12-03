@@ -14,7 +14,8 @@ import {
   Category,
   CreateCategoryForm,
   AdminTeamMember,
-  CreateTeamMemberForm
+  CreateTeamMemberForm,
+  CreateContactRequest,
 } from '@/types';
 
 function publicUrlFrom(bucket: string | null | undefined, path: string | null | undefined) {
@@ -156,7 +157,10 @@ export const projectsService = {
       location: project.location || '',
       created_at: project.created_at,
       updated_at: project.updated_at,
-      published_at: project.status === 'published' ? project.updated_at : null
+      published_at: project.status === 'published' ? project.updated_at : null,
+      embed_reel: (project as any).embed_reel || null,
+      results: (project as any).results || [],
+      deliverables: (project as any).deliverables || [],
     }));
   },
 
@@ -217,7 +221,10 @@ export const projectsService = {
       location: data.location || '',
       created_at: data.created_at,
       updated_at: data.updated_at,
-      published_at: data.status === 'published' ? data.updated_at : null
+      published_at: data.status === 'published' ? data.updated_at : null,
+      embed_reel: (data as any).embed_reel || null,
+      results: (data as any).results || [],
+      deliverables: (data as any).deliverables || [],
     };
   },
 
@@ -247,6 +254,9 @@ export const projectsService = {
         // NEW
         seo_title: project.seo_title || null,
         seo_description: project.seo_description || null,
+        embed_reel: project.embed_reel ?? null,
+        results: project.results ?? [],
+        deliverables: project.deliverables ?? [],
       })
       .select()
       .single();
@@ -294,6 +304,9 @@ export const projectsService = {
       tags: project.tags,
       seo_title: project.seo_title,
       seo_description: project.seo_description,
+      embed_reel: project.embed_reel,
+      results: project.results,
+      deliverables: project.deliverables,
     });
 
     const hasGallery = Array.isArray(project.gallery);
@@ -542,6 +555,9 @@ export const projectsService = {
         // convenience for public cards:
         date: project.date,
         description: project.description,
+        embed_reel: (project as any).embed_reel || null,
+        results: (project as any).results || [],
+        deliverables: (project as any).deliverables || [],
       }));
     },
 
@@ -611,6 +627,9 @@ export const projectsService = {
         // convenience for public cards:
         date: project.date,
         description: project.description,
+        embed_reel: (project as any).embed_reel || null,
+        results: (project as any).results || [],
+        deliverables: (project as any).deliverables || [],
       }));
     },
 
@@ -1017,4 +1036,16 @@ export const teamService = {
 
     return { url: data.publicUrl };
   }
+};
+
+export const contactService = {
+  async create(payload: CreateContactRequest) {
+    const { data, error } = await supabase
+      .from('contact_requests')
+      .insert(payload)
+
+
+    if (error) throw error;
+    return data;
+  },
 };

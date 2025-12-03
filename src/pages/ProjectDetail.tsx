@@ -28,6 +28,72 @@ type PublicProjectDetail = {
   embed_reel?: string | null;
 };
 
+const toEmbedUrl = (url: string) => {
+  try {
+    const u = new URL(url);
+
+    // --- YOUTUBE ---
+    if (u.hostname.includes('youtube.com') || u.hostname === 'youtu.be') {
+      // Already an /embed/ URL → use as-is
+      if (u.pathname.startsWith('/embed/')) {
+        return url;
+      }
+
+      // youtu.be/VIDEO_ID
+      if (u.hostname === 'youtu.be') {
+        const id = u.pathname.replace('/', '');
+        if (id) {
+          return `https://www.youtube.com/embed/${id}`;
+        }
+      }
+
+      // youtube.com/watch?v=VIDEO_ID
+      if (u.pathname === '/watch') {
+        const id = u.searchParams.get('v');
+        if (id) {
+          return `https://www.youtube.com/embed/${id}`;
+        }
+      }
+
+      // Fallback: if we have something like /shorts/VIDEO_ID
+      const parts = u.pathname.split('/');
+      const last = parts[parts.length - 1];
+      if (last) {
+        return `https://www.youtube.com/embed/${last}`;
+      }
+    }
+
+    // --- VIMEO ---
+    if (u.hostname.includes('vimeo.com')) {
+      // Normal Vimeo URL (https://vimeo.com/VIDEO_ID)
+      const parts = u.pathname.split('/');
+      const id = parts.filter(Boolean).pop();
+      if (id) {
+        return `https://player.vimeo.com/video/${id}`;
+      }
+    }
+
+    // If we don't recognize the pattern, just return original
+    return url;
+  } catch {
+    return url;
+  }
+};
+
+const isEmbeddableVideoUrl = (url: string) => {
+  try {
+    const u = new URL(url);
+    return (
+      u.hostname.includes('youtube.com') ||
+      u.hostname === 'youtu.be' ||
+      u.hostname.includes('vimeo.com')
+    );
+  } catch {
+    return false;
+  }
+};
+
+
 // map AdminProject -> PublicProjectDetail
 const toPublicDetail = (p: any): PublicProjectDetail => {
   const cover =
@@ -257,9 +323,9 @@ const ProjectDetail = () => {
                   <h2 className="text-3xl font-serif mb-6">Reel del proyecto</h2>
                   <div className="aspect-video rounded-lg overflow-hidden bg-black/5">
                     {/* If it's an embeddable URL (YouTube/Vimeo), you can iframe it; otherwise link out */}
-                    {project.embed_reel.includes('youtube') || project.embed_reel.includes('vimeo') ? (
+                    {isEmbeddableVideoUrl(project.embed_reel) ? (
                       <iframe
-                        src={project.embed_reel}
+                        src={toEmbedUrl(project.embed_reel)}
                         className="w-full h-full"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
@@ -280,6 +346,7 @@ const ProjectDetail = () => {
                         </div>
                       </div>
                     )}
+
                   </div>
                 </motion.div>
               )}

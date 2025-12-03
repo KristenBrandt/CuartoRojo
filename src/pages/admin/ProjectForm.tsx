@@ -54,6 +54,9 @@ export default function ProjectForm() {
     seo_description: '',
     tags: [],
     cover_image_url: null,
+    embed_reel: '',
+    results: [],
+    deliverables: [],
   });
 
   const [loading, setLoading] = useState(false);
@@ -478,6 +481,23 @@ export default function ProjectForm() {
                           Seleccionar Archivos
                         </Button>
                       </div>
+                    </div>
+
+                    {/* ✅ YouTube / Vimeo embed link */}
+                    <div className="space-y-2">
+                      <Label htmlFor="embed_reel">Video del proyecto (YouTube / Vimeo)</Label>
+                      <Input
+                        id="embed_reel"
+                        value={project.embed_reel ?? ''}
+                        onChange={(e) =>
+                          setProject((prev) => ({ ...prev, embed_reel: e.target.value }))
+                        }
+                        placeholder="https://www.youtube.com/watch?v=XXXXXXXXXXX"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Pega aquí el enlace del video del proyecto. Se mostrará embebido en la página
+                        pública si es de YouTube o Vimeo.
+                      </p>
                     </div>
 
                 {!!project.gallery?.length && (

@@ -124,6 +124,9 @@ export interface AdminProject {
   seo_title?: string | null;
   seo_description?: string | null;
   canonical_url?: string | null;
+  embed_reel?: string | null;
+  results?: string[];
+  deliverables?: string[];
 }
 
 export interface ProjectMedia {
@@ -240,3 +243,14 @@ export interface CreateTeamMemberForm {
   social_linkedin?: string;
   social_behance?: string;
 }
+
+export interface CreateContactRequest  {
+  name: string;
+  email: string;
+  phone?: string | null;
+  event_date?: string | null;
+  venue?: string | null;
+  service_type: string;
+  budget_range?: string | null;
+  message: string;
+};
